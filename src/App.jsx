@@ -100,7 +100,13 @@ export default function App() {
     setPendingImport(null); setView("scores"); setRaid(null); setBossIdx(0); setBgExpand(null); setProfile(null); setDetail(null);
   }, [pendingImport]);
 
-  const setStat = useCallback((p, k, v) => setBaseStats(prev => ({ ...prev, [p]: { ...(prev[p] || DEF_STATS), [k]: v === "" ? 0 : (parseFloat(v) || 0) } })), []);
+  const setStat = useCallback((p, k, v) => setBaseStats(prev => {
+    let n = v === "" ? 0 : (parseFloat(v) || 0);
+    n = Math.max(0, n);
+    if (k === "tenure") n = Math.min(12, n);      // weeks — score caps at 12, so the input does too
+    if (k === "attendance") n = Math.min(100, n); // it's a %
+    return { ...prev, [p]: { ...(prev[p] || DEF_STATS), [k]: n } };
+  }), []);
   const setOverride = useCallback((p, item, v) => setPtsOverrides(prev => ({ ...prev, [p]: { ...(prev[p] || {}), [item]: v === "" ? 0 : Math.max(0, parseInt(v) || 0) } })), []);
   const clearOverrides = useCallback(p => setPtsOverrides(prev => { const n = { ...prev }; delete n[p]; return n; }), []);
 
