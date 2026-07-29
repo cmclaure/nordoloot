@@ -3,6 +3,9 @@ import Papa from 'papaparse'
 import { CC, BT, MH, RAID_BOSSES, BUDGET, MOD_DEF, DEF_STATS, DEFAULT_LC } from './constants.js'
 import { compute, LS, loadLS } from './engine.js'
 
+// merge a saved modifier object over MOD_DEF so keys added later pick up defaults
+const mergeMod = sv => { const m = {}; Object.keys(MOD_DEF).forEach(k => { const s = sv && sv[k]; m[k] = s ? { ...MOD_DEF[k], on: s.on, w: s.w } : { ...MOD_DEF[k] }; }); return m; };
+
 export default function App() {
   const saved = useRef(loadLS());
   const s0 = saved.current || {};
@@ -12,8 +15,7 @@ export default function App() {
   const [baseStats, setBaseStats] = useState(s0.baseStats || {});
   const [awardLog, setAwardLog] = useState(s0.awardLog || []);
   const [drops, setDrops] = useState(s0.drops || []);
-  // merge saved modifier state over MOD_DEF so keys added after a save (e.g. ua) pick up defaults
-  const [mod, setMod] = useState(() => { const m = {}; Object.keys(MOD_DEF).forEach(k => { const sv = s0.mod && s0.mod[k]; m[k] = sv ? { ...MOD_DEF[k], on: sv.on, w: sv.w } : { ...MOD_DEF[k] }; }); return m; });
+  const [mod, setMod] = useState(() => mergeMod(s0.mod));
   const [excludeTier, setExcludeTier] = useState(s0.excludeTier !== undefined ? s0.excludeTier : true);
   const [lcItems, setLcItems] = useState(s0.lcItems || DEFAULT_LC());
 
@@ -39,6 +41,8 @@ export default function App() {
   const [lcNewP, setLcNewP] = useState("");
   // budgets audit view
   const [bgExpand, setBgExpand] = useState(null);  // player whose item list is open
+  // save-file import: {data} awaiting confirm, or {error}
+  const [pendingImport, setPendingImport] = useState(null);
 
   const lcNames = useMemo(() => lcItems.map(l => l.name), [lcItems]);
   const data = useMemo(() => tmbRows ? compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcNames) : null,
@@ -62,6 +66,39 @@ export default function App() {
     };
     rd.readAsText(file);
   }, []);
+
+  // ── save file export/import ──
+  const exportState = useCallback(() => {
+    const payload = { app: "nordoloot", version: 1, savedAt: new Date().toISOString(), tmbRows, tmbName, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems };
+    const blob = new Blob([JSON.stringify(payload, null, 1)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `nordoloot-save-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click(); URL.revokeObjectURL(a.href);
+  }, [tmbRows, tmbName, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems]);
+
+  const readSaveFile = useCallback((file) => {
+    if (!file) return;
+    const rd = new FileReader();
+    rd.onload = e => {
+      try {
+        const o = JSON.parse(e.target.result);
+        if (!o || typeof o !== "object" || o.app !== "nordoloot") throw new Error();
+        setPendingImport({ data: o });
+      } catch { setPendingImport({ error: file.name + " isn't a Nordoloot save file." }); }
+    };
+    rd.readAsText(file);
+  }, []);
+
+  const applyImport = useCallback(() => {
+    const o = pendingImport && pendingImport.data; if (!o) return;
+    setTmb(o.tmbRows || null); setTmbName(o.tmbName || "");
+    setPtsOverrides(o.ptsOverrides || {}); setBaseStats(o.baseStats || {});
+    setAwardLog(o.awardLog || []); setDrops(o.drops || []);
+    setMod(mergeMod(o.mod)); setExcludeTier(o.excludeTier !== undefined ? o.excludeTier : true);
+    setLcItems(o.lcItems || DEFAULT_LC());
+    setPendingImport(null); setView("scores"); setRaid(null); setBossIdx(0); setBgExpand(null); setProfile(null); setDetail(null);
+  }, [pendingImport]);
 
   const setStat = useCallback((p, k, v) => setBaseStats(prev => ({ ...prev, [p]: { ...(prev[p] || DEF_STATS), [k]: v === "" ? 0 : (parseFloat(v) || 0) } })), []);
   const setOverride = useCallback((p, item, v) => setPtsOverrides(prev => ({ ...prev, [p]: { ...(prev[p] || {}), [item]: v === "" ? 0 : Math.max(0, parseInt(v) || 0) } })), []);
@@ -162,6 +199,10 @@ export default function App() {
           <label className={"upload-zone" + (drag === "tmb" ? " drag" : "") + (tmbName ? " loaded" : "")} onDragOver={e => { e.preventDefault(); setDrag("tmb") }} onDragLeave={() => setDrag(null)} onDrop={e => { e.preventDefault(); setDrag(null); importCSV(e.dataTransfer.files[0]) }} style={{ cursor: "pointer" }}>
             <span style={{ color: tmbName ? "#4ade80" : "#fbbf24", fontWeight: 500, fontSize: 11 }}>{tmbName ? "✓ " + tmbName : "Drop TMB CSV"}</span>
             <input type="file" accept=".csv" onChange={e => importCSV(e.target.files[0])} style={{ display: "none" }} />
+          </label>
+          {hasData && <button className="btn" onClick={exportState} style={{ color: "#4ade80", borderColor: "#2d4a2d" }} title="Save everything to a file — backup or share with another officer">Export</button>}
+          <label className="btn" style={{ color: "#3FC7EB", borderColor: "#234055", cursor: "pointer" }} title="Load a Nordoloot save file">Import
+            <input type="file" accept=".json,application/json" onChange={e => { readSaveFile(e.target.files[0]); e.target.value = ""; }} style={{ display: "none" }} />
           </label>
           <button className="btn" onClick={() => setConfirmReset(true)} style={{ color: "#f87171", borderColor: "#4a2d2d" }}>Reset</button>
         </div>
@@ -481,6 +522,21 @@ export default function App() {
             <h3>Discord export</h3>
             <div className="discord-box">{discord}</div>
             <div className="modal-buttons"><button className="mx" onClick={() => setDiscord(null)}>Close</button><button className="mc" onClick={copyDiscord}>Copy to clipboard</button></div>
+          </div>
+        </div>)}
+
+      {pendingImport && (
+        <div className="modal-overlay" onClick={() => setPendingImport(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            {pendingImport.error ? (<>
+              <h3>Can't import</h3>
+              <p>{pendingImport.error}</p>
+              <div className="modal-buttons"><button className="mx" onClick={() => setPendingImport(null)}>Close</button></div>
+            </>) : (<>
+              <h3>Load this save file?</h3>
+              <p>{pendingImport.data.tmbName ? <>Contains <b>{pendingImport.data.tmbName}</b></> : "No TMB import"}{pendingImport.data.savedAt ? <> · saved {new Date(pendingImport.data.savedAt).toLocaleString()}</> : null} · {(pendingImport.data.awardLog || []).length} award{(pendingImport.data.awardLog || []).length === 1 ? "" : "s"} logged.{hasData ? " This replaces everything currently in the app." : ""}</p>
+              <div className="modal-buttons"><button className="mx" onClick={() => setPendingImport(null)}>Cancel</button><button className="mc" onClick={applyImport}>Load save</button></div>
+            </>)}
           </div>
         </div>)}
 

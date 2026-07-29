@@ -28,6 +28,7 @@ Or skip the terminal entirely: run `npm run build` once and open `dist/index.htm
 3. Check the warning banner / **Budgets** tab — it flags anyone whose total isn't exactly 500 (under or over).
 4. Message the raider, then fix their numbers right in the app with the **Adjust** button. No re-export needed — your edits are kept even when you import a fresh CSV later.
 5. Keep attendance, tenure, and absence strikes up to date on the **Players** tab.
+6. **Export** (top right) saves everything to a single file — use it as a backup before raid, or send it to another officer, who can **Import** it and see exactly what you see.
 
 ## Raid night
 
@@ -47,4 +48,4 @@ Each piece can be toggled and weighted on the **Modifiers** tab — the live for
 
 ## Practice data
 
-`fake-tmb-export-p3-notes.csv` is a fake 26-player roster with bids already filled in — import it to click around safely before using real data.
+`fake-tmb-export-p3-notes.csv` is a fake 28-player roster with bids already filled in — import it to click around safely before using real data.
