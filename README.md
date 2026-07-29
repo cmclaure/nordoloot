@@ -1,32 +1,50 @@
 # Nordoloot — Nordolo Loot System
 
-Point-budget loot distribution for Black Temple / Mount Hyjal. No backend — all data lives in localStorage and comes in via CSV imports.
+Point-budget loot distribution for Black Temple / Mount Hyjal. Everything saves automatically in your browser — nothing to set up beyond running the app.
 
-## Run
+## Getting started
 
 ```
 npm install
-npm run dev        # dev server
-npm run build      # production build → dist/
+npm run dev
 ```
 
-The built `dist/index.html` uses relative paths and can be opened directly from the filesystem.
+Or skip the terminal entirely: run `npm run build` once and open `dist/index.html` straight from your file explorer.
 
-## Test data (not bundled into the build)
+## How the system works
 
-- `fake-tmb-export-p3-notes.csv` — 26 players with note bids, exercising every bid case. Expected on import: **8 raiders off-budget** (Grimjaw 545, Frostbyte 460, Voidlord 450, Dotsmagee 610, Shadowmind 474, Zappurah 348, Chainmend 425, Owlcapone 323) and **4 AUTO players** (Wallmeat, Petpuller, Mendylou — no notes; Bonkers — prose-only notes, must not parse as bids). Cheesybread uses "N pts" note format and lands exactly 500. Owlcapone's shortfall is a bid on a tier token ("not counted (tier)"), Voidlord's is a bid on an LC item, Zappurah's is a bid on a crossed-off item (received_at set).
-- `fake-tmb-export-p3.csv` — older export with empty notes → all players auto-derived. Expected contested counts: Band of Devastation 15, Choker of Endless Nightmares 11, Leggings of Devastation 9, Madness of the Betrayer 7, Cursed Vision of Sargeras 5, Cataclysm's Edge 5.
+- Every raider gets a **500-point budget** to spread across their wishlist however they want. More points on an item = higher priority.
+- Raiders enter their bid in the item's **Note** field on ThatsmyBIS — just the number (`300` or `300 pts`).
+- Bids are **blind** — nobody sees anyone else's numbers.
+- **Highest score wins.** Ties go to /roll.
+- Tier tokens, Loot Council items, and crafting reagents are **outside the budget** — don't spend points on them.
+- Raiders who don't enter any bids get automatic points based on their wishlist order.
+- **Points are spent when you win.** Win an item and the points you bid on it are gone — they don't move to your other items.
 
-## Point bids
+## Officer workflow
 
-Everything comes in through the single TMB export. Raiders put their point bid in each wishlist item's **note** on ThatsmyBIS — a bare number like `300` (or `300 pts`). Prose notes are never misread as bids. Players with no note-bids fall back to rank-derived auto points and aren't checked against the budget. The **Budgets** tab audits every player's total against 500 (under/over indicators plus a warning banner) and lets the officer adjust any bid in-app — edits persist and survive re-imports, so there's no need to re-export from TMB after talking to a raider.
+1. Export the roster CSV from ThatsmyBIS.
+2. Drop it onto the upload zone in the app.
+3. Check the warning banner / **Budgets** tab — it flags anyone whose total isn't exactly 500 (under or over).
+4. Message the raider, then fix their numbers right in the app with the **Adjust** button. No re-export needed — your edits are kept even when you import a fresh CSV later.
+5. Keep attendance, tenure, and absence strikes up to date on the **Players** tab.
 
-## Modifiers
+## Raid night
 
-Attendance (+20), Tenure (+30, capped at 12 weeks), Unexcused Absence (−25 escalating: n strikes cost 25·n(n+1)/2), Win Penalty (−8), plus optional Passing Bonus and Bad Luck Protection. All toggleable with weight sliders.
+- **Raid Night** tab: pick tonight's raid and step through boss by boss — only that boss's drops are shown.
+- **Award** gives the item to the projected winner. On a tie, it asks you to pick the /roll winner. **Undo** is in the session log if you misclick.
+- **Drop** removes one player's claim (they got the item outside raid) — doesn't count as a win, item stays live for everyone else.
+- **LC Items** tab: manual shortlists for council items like the Skull and Warglaives.
+- **Discord** buttons copy a formatted summary (projected winners, tonight's predictions, or the award log) to paste into the guild server.
 
-## Structure
+## Scoring
 
-- `src/constants.js` — class colors, boss loot tables, modifier defaults
-- `src/engine.js` — score formula, award-log replay (points spent on win, BLP), localStorage
-- `src/App.jsx` — all UI (tabs, modals, imports, budget builder)
+```
+final = bid + attendance + tenure − prior wins − unexcused absences
+```
+
+Each piece can be toggled and weighted on the **Modifiers** tab — the live formula there always shows exactly what's being calculated.
+
+## Practice data
+
+`fake-tmb-export-p3-notes.csv` is a fake 26-player roster with bids already filled in — import it to click around safely before using real data.
