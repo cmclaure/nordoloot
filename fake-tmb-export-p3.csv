@@ -1,0 +1,208 @@
+type,raid_group_name,member_name,character_name,character_class,character_is_alt,character_inactive_at,character_note,sort_order,item_name,item_id,is_offspec,note,received_at,import_id,item_note,item_prio_note,officer_note,item_tier,item_tier_label,created_at,updated_at,instance_name,source_name
+wishlist,Nordolo,abikutakisha,Abikutakisha,Shaman,0,,,0,Band of Devastation,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Black Temple Trash
+wishlist,Nordolo,abikutakisha,Abikutakisha,Shaman,0,,,1,Madness of the Betrayer,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Illidari Council
+wishlist,Nordolo,abikutakisha,Abikutakisha,Shaman,0,,,2,Bow of the Inferno,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Azgalor
+wishlist,Nordolo,abikutakisha,Abikutakisha,Shaman,0,,,3,Veil of Turning Leaves,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Illidari Council
+wishlist,Nordolo,abikutakisha,Abikutakisha,Shaman,0,,,4,Zhar'doom Greatstaff of the Devourer,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Illidan Stormrage
+wishlist,Nordolo,abikutakisha,Abikutakisha,Shaman,0,,,5,Grips of Silent Justice,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Shade of Akama
+wishlist,Nordolo,abikutakisha,Abikutakisha,Shaman,0,,,6,Treads of the Den Mother,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Black Temple Trash
+wishlist,Nordolo,abikutakisha,Abikutakisha,Shaman,0,,,7,The Unbreakable Will,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Anetheron
+wishlist,Nordolo,abikutakisha,Abikutakisha,Shaman,0,,,8,Bastion of Light,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Anetheron
+wishlist,Nordolo,alivastik,Alivastik,Shaman,0,,,0,Band of Devastation,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Black Temple Trash
+wishlist,Nordolo,alivastik,Alivastik,Shaman,0,,,1,Idol of the White Stag,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Supremus
+wishlist,Nordolo,alivastik,Alivastik,Shaman,0,,,2,Cowl of Benevolence,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Teron Gorefiend
+wishlist,Nordolo,alivastik,Alivastik,Shaman,0,,,3,The Brutalizer,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Supremus
+wishlist,Nordolo,alivastik,Alivastik,Shaman,0,,,4,Hammer of Judgement,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Mount Hyjal Trash
+wishlist,Nordolo,alivastik,Alivastik,Shaman,0,,,5,Tracker's Blade,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Rage Winterchill
+wishlist,Nordolo,alivastik,Alivastik,Shaman,0,,,6,Praetorian's Legguards,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Shade of Akama
+wishlist,Nordolo,cheesybread,Cheesybread,Shaman,0,,,0,Band of Devastation,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Black Temple Trash
+wishlist,Nordolo,cheesybread,Cheesybread,Shaman,0,,,1,Black Bow of the Betrayer,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Illidan Stormrage
+wishlist,Nordolo,cheesybread,Cheesybread,Shaman,0,,,2,The Unbreakable Will,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Anetheron
+wishlist,Nordolo,cheesybread,Cheesybread,Shaman,0,,,3,Flashfire Girdle,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Shade of Akama
+wishlist,Nordolo,cheesybread,Cheesybread,Shaman,0,,,4,Myrmidon's Treads,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Shade of Akama
+wishlist,Nordolo,damain,Damain,Shaman,0,,,0,Band of Devastation,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Black Temple Trash
+wishlist,Nordolo,damain,Damain,Shaman,0,,,1,Anetheron's Noose,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Anetheron
+wishlist,Nordolo,damain,Damain,Shaman,0,,,2,Grips of Damnation,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Reliquary of Souls
+wishlist,Nordolo,damain,Damain,Shaman,0,,,3,Razorfury Mantle,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Kaz'rogal
+wishlist,Nordolo,damain,Damain,Shaman,0,,,4,Nadina's Pendant of Purity,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Mother Shahraz
+wishlist,Nordolo,damain,Damain,Shaman,0,,,5,Valestalker Girdle,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Kaz'rogal
+wishlist,Nordolo,damain,Damain,Shaman,0,,,6,Archbishop's Slippers,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Anetheron
+wishlist,Nordolo,damain,Damain,Shaman,0,,,7,Quickstrider Moccasins,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Anetheron
+wishlist,Nordolo,zeelatalisha,Zeelatalisha,Shaman,0,,,0,Choker of Endless Nightmares,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Supremus
+wishlist,Nordolo,zeelatalisha,Zeelatalisha,Shaman,0,,,1,Beast-tamer's Shoulders,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Kaz'rogal
+wishlist,Nordolo,zeelatalisha,Zeelatalisha,Shaman,0,,,2,Mantle of Darkness,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,High Warlord Naj'entus
+wishlist,Nordolo,zeelatalisha,Zeelatalisha,Shaman,0,,,3,Legionkiller,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Supremus
+wishlist,Nordolo,zeelatalisha,Zeelatalisha,Shaman,0,,,4,Girdle of Mighty Resolve,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Gurtogg Bloodboil
+wishlist,Nordolo,zeelatalisha,Zeelatalisha,Shaman,0,,,5,Shadowmoon Insignia,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Gurtogg Bloodboil
+wishlist,Nordolo,zeelatalisha,Zeelatalisha,Shaman,0,,,6,The Maelstrom's Fury,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,High Warlord Naj'entus
+wishlist,Nordolo,amarianna,Amarianna,Priest,0,,,0,Choker of Endless Nightmares,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Supremus
+wishlist,Nordolo,amarianna,Amarianna,Priest,0,,,1,Leggings of Devastation,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Mother Shahraz
+wishlist,Nordolo,amarianna,Amarianna,Priest,0,,,2,Treads of the Den Mother,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Black Temple Trash
+wishlist,Nordolo,amarianna,Amarianna,Priest,0,,,3,Blue Suede Shoes,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Kaz'rogal
+wishlist,Nordolo,amarianna,Amarianna,Priest,0,,,4,Shadowmoon Destroyer's Drape,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Teron Gorefiend
+wishlist,Nordolo,amarianna,Amarianna,Priest,0,,,5,The Brutalizer,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Supremus
+wishlist,Nordolo,amarianna,Amarianna,Priest,0,,,6,Leggings of Channeled Elements,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Kaz'rogal
+wishlist,Nordolo,amarianna,Amarianna,Priest,0,,,7,Claw of Molten Fury,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Mount Hyjal Trash
+wishlist,Nordolo,amarianna,Amarianna,Priest,0,,,8,Softstep Boots of Tracking,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Teron Gorefiend
+wishlist,Nordolo,bigrot,Bigrot,Priest,0,,,0,Choker of Endless Nightmares,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Supremus
+wishlist,Nordolo,bigrot,Bigrot,Priest,0,,,1,Leggings of Devastation,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Mother Shahraz
+wishlist,Nordolo,bigrot,Bigrot,Priest,0,,,2,Naaru-Blessed Life Rod,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Reliquary of Souls
+wishlist,Nordolo,bigrot,Bigrot,Priest,0,,,3,Legionkiller,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Supremus
+wishlist,Nordolo,bigrot,Bigrot,Priest,0,,,4,Bracers of the Pathfinder,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Rage Winterchill
+wishlist,Nordolo,bigrot,Bigrot,Priest,0,,,5,Blue Suede Shoes,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Kaz'rogal
+wishlist,Nordolo,bigrot,Bigrot,Priest,0,,,6,Botanist's Gloves of Growth,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Teron Gorefiend
+wishlist,Nordolo,raxlor,Raxlor,Priest,0,,,0,Choker of Endless Nightmares,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Supremus
+wishlist,Nordolo,raxlor,Raxlor,Priest,0,,,1,Leggings of Devastation,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Mother Shahraz
+wishlist,Nordolo,raxlor,Raxlor,Priest,0,,,2,Hellfire-Encased Pendant,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Black Temple Trash
+wishlist,Nordolo,raxlor,Raxlor,Priest,0,,,3,Pendant of Titans,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Reliquary of Souls
+wishlist,Nordolo,raxlor,Raxlor,Priest,0,,,4,Amice of Brilliant Light,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Shade of Akama
+wishlist,Nordolo,raxlor,Raxlor,Priest,0,,,5,Naturewarden's Treads,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Reliquary of Souls
+wishlist,Nordolo,raxlor,Raxlor,Priest,0,,,6,Stillwater Boots,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Rage Winterchill
+wishlist,Nordolo,raxlor,Raxlor,Priest,0,,,7,Choker of Serrated Blades,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Black Temple Trash
+wishlist,Nordolo,wonthealbad,Wonthealbad,Priest,0,,,0,Choker of Endless Nightmares,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Supremus
+wishlist,Nordolo,wonthealbad,Wonthealbad,Priest,0,,,1,Softstep Boots of Tracking,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Teron Gorefiend
+wishlist,Nordolo,wonthealbad,Wonthealbad,Priest,0,,,2,Illidari Runeshield,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Black Temple Trash
+wishlist,Nordolo,wonthealbad,Wonthealbad,Priest,0,,,3,Mantle of Darkness,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,High Warlord Naj'entus
+wishlist,Nordolo,wonthealbad,Wonthealbad,Priest,0,,,4,Apostle of Argus,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Archimonde
+wishlist,Nordolo,wonthealbad,Wonthealbad,Priest,0,,,5,Chronicle of Dark Secrets,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Rage Winterchill
+wishlist,Nordolo,wonthealbad,Wonthealbad,Priest,0,,,6,The Unbreakable Will,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Anetheron
+wishlist,Nordolo,ekimm,Ekimm,Warrior,0,,,0,Band of Devastation,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Black Temple Trash
+wishlist,Nordolo,ekimm,Ekimm,Warrior,0,,,1,Cataclysm's Edge,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Archimonde
+wishlist,Nordolo,ekimm,Ekimm,Warrior,0,,,2,Translucent Spellthread Necklace,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Reliquary of Souls
+wishlist,Nordolo,ekimm,Ekimm,Warrior,0,,,3,Helm of Soothing Currents,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,High Warlord Naj'entus
+wishlist,Nordolo,ekimm,Ekimm,Warrior,0,,,4,The Brutalizer,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Supremus
+wishlist,Nordolo,ekimm,Ekimm,Warrior,0,,,5,Treads of the Den Mother,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Black Temple Trash
+wishlist,Nordolo,ekimm,Ekimm,Warrior,0,,,6,The Wavemender's Mantle,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Reliquary of Souls
+wishlist,Nordolo,ekimm,Ekimm,Warrior,0,,,7,Girdle of the Lightbearer,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Black Temple Trash
+wishlist,Nordolo,pokie,Pokie,Warrior,0,,,0,Band of Devastation,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Black Temple Trash
+wishlist,Nordolo,pokie,Pokie,Warrior,0,,,1,Cataclysm's Edge,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Archimonde
+wishlist,Nordolo,pokie,Pokie,Warrior,0,,,2,Naturalist's Preserving Cinch,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Supremus
+wishlist,Nordolo,pokie,Pokie,Warrior,0,,,3,Blood-stained Pauldrons,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Rage Winterchill
+wishlist,Nordolo,pokie,Pokie,Warrior,0,,,4,Illidari Runeshield,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Black Temple Trash
+wishlist,Nordolo,pokie,Pokie,Warrior,0,,,5,Belt of Divine Guidance,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Illidari Council
+wishlist,Nordolo,pokie,Pokie,Warrior,0,,,6,Kilt of Immortal Nature,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Shade of Akama
+wishlist,Nordolo,pokie,Pokie,Warrior,0,,,7,Bracers of Martyrdom,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Rage Winterchill
+wishlist,Nordolo,pokie,Pokie,Warrior,0,,,8,Heartshatter Breastplate,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Mother Shahraz
+wishlist,Nordolo,genzesta,Genzesta,Paladin,0,,,0,Band of Devastation,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Black Temple Trash
+wishlist,Nordolo,genzesta,Genzesta,Paladin,0,,,1,Cataclysm's Edge,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Archimonde
+wishlist,Nordolo,genzesta,Genzesta,Paladin,0,,,2,The Wavemender's Mantle,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Reliquary of Souls
+wishlist,Nordolo,genzesta,Genzesta,Paladin,0,,,3,Ring of Deceitful Intent,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Shade of Akama
+wishlist,Nordolo,genzesta,Genzesta,Paladin,0,,,4,Staff of Immaculate Recovery,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Gurtogg Bloodboil
+wishlist,Nordolo,genzesta,Genzesta,Paladin,0,,,5,Belt of the Crescent Moon,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Kaz'rogal
+wishlist,Nordolo,makjudge,Makjudge,Paladin,0,,,0,Band of Devastation,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Black Temple Trash
+wishlist,Nordolo,makjudge,Makjudge,Paladin,0,,,1,Cataclysm's Edge,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Archimonde
+wishlist,Nordolo,makjudge,Makjudge,Paladin,0,,,2,Illidari Runeshield,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Black Temple Trash
+wishlist,Nordolo,makjudge,Makjudge,Paladin,0,,,3,Girdle of Stability,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Gurtogg Bloodboil
+wishlist,Nordolo,makjudge,Makjudge,Paladin,0,,,4,Hammer of Atonement,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Kaz'rogal
+wishlist,Nordolo,makjudge,Makjudge,Paladin,0,,,5,Faceplate of the Impenetrable,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Illidan Stormrage
+wishlist,Nordolo,makjudge,Makjudge,Paladin,0,,,6,Nethervoid Cloak,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Black Temple Trash
+wishlist,Nordolo,makjudge,Makjudge,Paladin,0,,,7,The Seeker's Wristguards,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Shade of Akama
+wishlist,Nordolo,spits,Spits,Paladin,0,,,0,Band of Devastation,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Black Temple Trash
+wishlist,Nordolo,spits,Spits,Paladin,0,,,1,Cataclysm's Edge,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Archimonde
+wishlist,Nordolo,spits,Spits,Paladin,0,,,2,Hellfire-Encased Pendant,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Black Temple Trash
+wishlist,Nordolo,spits,Spits,Paladin,0,,,3,Softstep Boots of Tracking,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Teron Gorefiend
+wishlist,Nordolo,spits,Spits,Paladin,0,,,4,Mail of Fevered Pursuit,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Archimonde
+wishlist,Nordolo,spits,Spits,Paladin,0,,,5,Belt of Seething Fury,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Kaz'rogal
+wishlist,Nordolo,spits,Spits,Paladin,0,,,6,Praetorian's Legguards,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Shade of Akama
+wishlist,Nordolo,spits,Spits,Paladin,0,,,7,Rifle of the Stoic Guardian,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Teron Gorefiend
+received,Nordolo,spits,Spits,Paladin,0,,,0,Tide-Stomper's Greaves,0,0,,2026-06-18 00:00:00,,,,,,,2026-06-18 00:00:00,2026-06-18 00:00:00,Black Temple,High Warlord Naj'entus
+wishlist,Nordolo,girn,Girn,Druid,0,,,0,Band of Devastation,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Black Temple Trash
+wishlist,Nordolo,girn,Girn,Druid,0,,,1,Madness of the Betrayer,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Illidari Council
+wishlist,Nordolo,girn,Girn,Druid,0,,,2,Helm of Soothing Currents,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,High Warlord Naj'entus
+wishlist,Nordolo,girn,Girn,Druid,0,,,3,Don Rodrigo's Poncho,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Azgalor
+wishlist,Nordolo,girn,Girn,Druid,0,,,4,Ring of Captured Storms,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,High Warlord Naj'entus
+wishlist,Nordolo,girn,Girn,Druid,0,,,5,Translucent Spellthread Necklace,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Reliquary of Souls
+wishlist,Nordolo,hatorii,Hatorii,Druid,0,,,0,Band of Devastation,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Black Temple Trash
+wishlist,Nordolo,hatorii,Hatorii,Druid,0,,,1,Madness of the Betrayer,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Illidari Council
+wishlist,Nordolo,hatorii,Hatorii,Druid,0,,,2,Band of the Abyssal Lord,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Supremus
+wishlist,Nordolo,hatorii,Hatorii,Druid,0,,,3,Felstone Bulwark,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Supremus
+wishlist,Nordolo,hatorii,Hatorii,Druid,0,,,4,Faceplate of the Impenetrable,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Illidan Stormrage
+wishlist,Nordolo,hatorii,Hatorii,Druid,0,,,5,Girdle of Mighty Resolve,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Gurtogg Bloodboil
+wishlist,Nordolo,hatorii,Hatorii,Druid,0,,,6,The Unbreakable Will,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Anetheron
+wishlist,Nordolo,hatorii,Hatorii,Druid,0,,,7,Shoulders of the Hidden Predator,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Shade of Akama
+wishlist,Nordolo,idioto,Idioto,Druid,0,,,0,Band of Devastation,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Black Temple Trash
+wishlist,Nordolo,idioto,Idioto,Druid,0,,,1,Madness of the Betrayer,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Illidari Council
+wishlist,Nordolo,idioto,Idioto,Druid,0,,,2,Heart of Darkness,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Black Temple Trash
+wishlist,Nordolo,idioto,Idioto,Druid,0,,,3,Shoulders of the Hidden Predator,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Shade of Akama
+wishlist,Nordolo,idioto,Idioto,Druid,0,,,4,Boneweave Girdle,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Reliquary of Souls
+wishlist,Nordolo,idioto,Idioto,Druid,0,,,5,Golden Links of Restoration,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Anetheron
+wishlist,Nordolo,investedsalt,Investedsalt,Warlock,0,,,0,Choker of Endless Nightmares,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Supremus
+wishlist,Nordolo,investedsalt,Investedsalt,Warlock,0,,,1,Leggings of Devastation,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Mother Shahraz
+wishlist,Nordolo,investedsalt,Investedsalt,Warlock,0,,,2,Cursed Vision of Sargeras,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Illidan Stormrage
+wishlist,Nordolo,investedsalt,Investedsalt,Warlock,0,,,3,Mail of Fevered Pursuit,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Archimonde
+wishlist,Nordolo,investedsalt,Investedsalt,Warlock,0,,,4,Fists of Mukoa,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,High Warlord Naj'entus
+wishlist,Nordolo,investedsalt,Investedsalt,Warlock,0,,,5,Pillager's Gauntlets,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Black Temple Trash
+wishlist,Nordolo,investedsalt,Investedsalt,Warlock,0,,,6,Terrorweave Tunic,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Azgalor
+wishlist,Nordolo,investedsalt,Investedsalt,Warlock,0,,,7,Garments of Temperance,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Gurtogg Bloodboil
+wishlist,Nordolo,investedsalt,Investedsalt,Warlock,0,,,8,Beast-tamer's Shoulders,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Kaz'rogal
+wishlist,Nordolo,investedsalt,Investedsalt,Warlock,0,,,9,Amice of Brilliant Light,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Shade of Akama
+wishlist,Nordolo,notlox,Notlox,Warlock,0,,,0,Choker of Endless Nightmares,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Supremus
+wishlist,Nordolo,notlox,Notlox,Warlock,0,,,1,Leggings of Devastation,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Mother Shahraz
+wishlist,Nordolo,notlox,Notlox,Warlock,0,,,2,Cursed Vision of Sargeras,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Illidan Stormrage
+wishlist,Nordolo,notlox,Notlox,Warlock,0,,,3,Stormrage Signet Ring,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Illidan Stormrage
+wishlist,Nordolo,notlox,Notlox,Warlock,0,,,4,Don Alejandro's Money Belt,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Anetheron
+wishlist,Nordolo,notlox,Notlox,Warlock,0,,,5,Shadowmoon Destroyer's Drape,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Teron Gorefiend
+wishlist,Nordolo,notlox,Notlox,Warlock,0,,,6,Cloak of the Illidari Council,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Illidari Council
+wishlist,Nordolo,notlox,Notlox,Warlock,0,,,7,Rising Tide,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,High Warlord Naj'entus
+wishlist,Nordolo,notlox,Notlox,Warlock,0,,,8,Nether Shadow Tunic,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Supremus
+wishlist,Nordolo,notlox,Notlox,Warlock,0,,,9,Tide-Stomper's Greaves,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,High Warlord Naj'entus
+wishlist,Nordolo,rafael,Rafael,Warlock,0,,,0,Choker of Endless Nightmares,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Supremus
+wishlist,Nordolo,rafael,Rafael,Warlock,0,,,1,Leggings of Devastation,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Mother Shahraz
+wishlist,Nordolo,rafael,Rafael,Warlock,0,,,2,Cursed Vision of Sargeras,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Illidan Stormrage
+wishlist,Nordolo,rafael,Rafael,Warlock,0,,,3,Golden Links of Restoration,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Anetheron
+wishlist,Nordolo,rafael,Rafael,Warlock,0,,,4,Cuffs of Devastation,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Rage Winterchill
+wishlist,Nordolo,rafael,Rafael,Warlock,0,,,5,Belt of Seething Fury,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Kaz'rogal
+wishlist,Nordolo,rafael,Rafael,Warlock,0,,,6,Bow of the Inferno,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Azgalor
+wishlist,Nordolo,rafael,Rafael,Warlock,0,,,7,Chronicle of Dark Secrets,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Rage Winterchill
+wishlist,Nordolo,rafael,Rafael,Warlock,0,,,8,Fists of Mukoa,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,High Warlord Naj'entus
+wishlist,Nordolo,rafael,Rafael,Warlock,0,,,9,Pillager's Gauntlets,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Black Temple Trash
+wishlist,Nordolo,sandwitchy,Sandwitchy,Warlock,0,,,0,Choker of Endless Nightmares,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Supremus
+wishlist,Nordolo,sandwitchy,Sandwitchy,Warlock,0,,,1,Leggings of Devastation,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Mother Shahraz
+wishlist,Nordolo,sandwitchy,Sandwitchy,Warlock,0,,,2,Cursed Vision of Sargeras,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Illidan Stormrage
+wishlist,Nordolo,sandwitchy,Sandwitchy,Warlock,0,,,3,Stillwater Boots,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Rage Winterchill
+wishlist,Nordolo,sandwitchy,Sandwitchy,Warlock,0,,,4,Mail of Fevered Pursuit,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Archimonde
+wishlist,Nordolo,sandwitchy,Sandwitchy,Warlock,0,,,5,Idol of the White Stag,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Supremus
+wishlist,Nordolo,sandwitchy,Sandwitchy,Warlock,0,,,6,Girdle of the Lightbearer,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Black Temple Trash
+wishlist,Nordolo,sandwitchy,Sandwitchy,Warlock,0,,,7,Nethervoid Cloak,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Black Temple Trash
+wishlist,Nordolo,sandwitchy,Sandwitchy,Warlock,0,,,8,Claw of Molten Fury,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Mount Hyjal Trash
+wishlist,Nordolo,sandwitchy,Sandwitchy,Warlock,0,,,9,Shroud of the Highborne,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Illidan Stormrage
+wishlist,Nordolo,shoreski,Shoreski,Warlock,0,,,0,Choker of Endless Nightmares,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Supremus
+wishlist,Nordolo,shoreski,Shoreski,Warlock,0,,,1,Leggings of Devastation,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Mother Shahraz
+wishlist,Nordolo,shoreski,Shoreski,Warlock,0,,,2,Spiritwalker Gauntlets,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Shade of Akama
+wishlist,Nordolo,shoreski,Shoreski,Warlock,0,,,3,Swiftsteel Bludgeon,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Black Temple Trash
+wishlist,Nordolo,shoreski,Shoreski,Warlock,0,,,4,Flashfire Girdle,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Shade of Akama
+wishlist,Nordolo,shoreski,Shoreski,Warlock,0,,,5,Insidious Bands,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Teron Gorefiend
+wishlist,Nordolo,shoreski,Shoreski,Warlock,0,,,6,Blind-Seers Icon,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Shade of Akama
+wishlist,Nordolo,shoreski,Shoreski,Warlock,0,,,7,Hellfire-Encased Pendant,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Black Temple Trash
+wishlist,Nordolo,shoreski,Shoreski,Warlock,0,,,8,Claw of Molten Fury,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Mount Hyjal Trash
+wishlist,Nordolo,kayzoh,Kayzoh,Mage,0,,,0,Choker of Endless Nightmares,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Supremus
+wishlist,Nordolo,kayzoh,Kayzoh,Mage,0,,,1,Leggings of Devastation,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Mother Shahraz
+wishlist,Nordolo,kayzoh,Kayzoh,Mage,0,,,2,Cursed Vision of Sargeras,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Illidan Stormrage
+wishlist,Nordolo,kayzoh,Kayzoh,Mage,0,,,3,Spiritwalker Gauntlets,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Shade of Akama
+wishlist,Nordolo,kayzoh,Kayzoh,Mage,0,,,4,Legionkiller,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Supremus
+wishlist,Nordolo,kayzoh,Kayzoh,Mage,0,,,5,Unstoppable Aggressor's Ring,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Gurtogg Bloodboil
+wishlist,Nordolo,kayzoh,Kayzoh,Mage,0,,,6,Elunite Empowered Bracers,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Reliquary of Souls
+wishlist,Nordolo,kayzoh,Kayzoh,Mage,0,,,7,Eternium Shell Bracers,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,High Warlord Naj'entus
+received,Nordolo,kayzoh,Kayzoh,Mage,0,,,0,Robes of Rhonin,0,0,,2026-06-18 00:00:00,,,,,,,2026-06-18 00:00:00,2026-06-18 00:00:00,Mount Hyjal,Archimonde
+wishlist,Nordolo,mdz,Mdz,Hunter,0,,,0,Band of Devastation,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Black Temple Trash
+wishlist,Nordolo,mdz,Mdz,Hunter,0,,,1,Madness of the Betrayer,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Illidari Council
+wishlist,Nordolo,mdz,Mdz,Hunter,0,,,2,Girdle of the Lightbearer,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Black Temple Trash
+wishlist,Nordolo,mdz,Mdz,Hunter,0,,,3,Girdle of Stability,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Gurtogg Bloodboil
+wishlist,Nordolo,mdz,Mdz,Hunter,0,,,4,Crystal Spire of Karabor,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Illidan Stormrage
+wishlist,Nordolo,mdz,Mdz,Hunter,0,,,5,Blood-Cursed Shoulderpads,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Gurtogg Bloodboil
+wishlist,Nordolo,mdz,Mdz,Hunter,0,,,6,Fist of Molten Fury,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Mount Hyjal Trash
+wishlist,Nordolo,mdz,Mdz,Hunter,0,,,7,Messenger of Fate,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Gurtogg Bloodboil
+wishlist,Nordolo,mdz,Mdz,Hunter,0,,,8,Belt of the Crescent Moon,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Kaz'rogal
+wishlist,Nordolo,varyinn,Varyinn,Hunter,0,,,0,Band of Devastation,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Black Temple Trash
+wishlist,Nordolo,varyinn,Varyinn,Hunter,0,,,1,Madness of the Betrayer,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Illidari Council
+wishlist,Nordolo,varyinn,Varyinn,Hunter,0,,,2,Torch of the Damned,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Reliquary of Souls
+wishlist,Nordolo,varyinn,Varyinn,Hunter,0,,,3,The Skull of Gul'dan,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Illidan Stormrage
+wishlist,Nordolo,varyinn,Varyinn,Hunter,0,,,4,Boots of Oceanic Fury,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,High Warlord Naj'entus
+wishlist,Nordolo,varyinn,Varyinn,Hunter,0,,,5,Belt of the Crescent Moon,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Kaz'rogal
+wishlist,Nordolo,vandalf,Vandalf,Rogue,0,,,0,Band of Devastation,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Black Temple Trash
+wishlist,Nordolo,vandalf,Vandalf,Rogue,0,,,1,Madness of the Betrayer,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Illidari Council
+wishlist,Nordolo,vandalf,Vandalf,Rogue,0,,,2,Gauntlets of Enforcement,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Teron Gorefiend
+wishlist,Nordolo,vandalf,Vandalf,Rogue,0,,,3,Syphon of the Nathrezim,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Supremus
+wishlist,Nordolo,vandalf,Vandalf,Rogue,0,,,4,Pendant of Titans,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Black Temple,Reliquary of Souls
+wishlist,Nordolo,vandalf,Vandalf,Rogue,0,,,5,Bastion of Light,0,0,,,,,,,,,2026-06-20 00:00:00,2026-06-25 00:00:00,Mount Hyjal,Anetheron
+received,Nordolo,vandalf,Vandalf,Rogue,0,,,0,Blade of Infamy,0,0,,2026-06-18 00:00:00,,,,,,,2026-06-18 00:00:00,2026-06-18 00:00:00,Mount Hyjal,Anetheron
