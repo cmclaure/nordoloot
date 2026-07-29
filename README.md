@@ -14,14 +14,13 @@ The built `dist/index.html` uses relative paths and can be opened directly from 
 
 ## Test data (not bundled into the build)
 
-- `fake-tmb-export-p3.csv` — TMB export, 26 players, BT/Hyjal wishlists
-- `fake-budget-submissions-p3.csv` — budget submissions, every player at exactly 500 points
+- `fake-tmb-export-p3.csv` — TMB export, 26 players, BT/Hyjal wishlists (empty notes → all players auto-derived)
 
-Drag both onto the upload zones. Expected contested counts: Band of Devastation 15, Choker of Endless Nightmares 11, Leggings of Devastation 9, Madness of the Betrayer 7, Cursed Vision of Sargeras 5, Cataclysm's Edge 5.
+Drag it onto the upload zone. Expected contested counts: Band of Devastation 15, Choker of Endless Nightmares 11, Leggings of Devastation 9, Madness of the Betrayer 7, Cursed Vision of Sargeras 5, Cataclysm's Edge 5.
 
-## Submissions
+## Point bids
 
-The Budget tab has two modes: **Build My Budget** (raiders pick items by boss, allocate exactly 500 points, and copy a compact `NDL1|…` string) and **Officer Import** (paste one or many strings; each is validated — over-budget, unknown items, bad versions, and duplicates are flagged — and accepted players replace their prior submission). The Budget CSV drop zone still works as a fallback.
+Everything comes in through the single TMB export. Raiders put their point bid in each wishlist item's **note** on ThatsmyBIS — a bare number like `300` (or `300 pts`). Prose notes are never misread as bids. Players with no note-bids fall back to rank-derived auto points and aren't checked against the budget. The **Budgets** tab audits every player's total against 500 (under/over indicators plus a warning banner) and lets the officer adjust any bid in-app — edits persist and survive re-imports, so there's no need to re-export from TMB after talking to a raider.
 
 ## Modifiers
 

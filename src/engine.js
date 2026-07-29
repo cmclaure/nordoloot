@@ -16,46 +16,60 @@ export function scoreParts(base, st, mod) {
 }
 export const pairKey = (p, i) => p + "\0" + i;
 
-export function compute(tmbRows, budgetRows, baseStats, awardLog, drops, mod, excludeTier, lcNames) {
+// A wishlist note is a point bid only when it's a standalone number ("300", "300 pts") —
+// prose notes must never be misread as points.
+export const parseBidNote = n => { const m = String(n || "").trim().match(/^(\d{1,4})\s*(?:pts?|points?)?$/i); return m ? parseInt(m[1]) : null; };
+
+export function compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcNames) {
   const lcSet = new Set(lcNames);
   const excluded = it => lcSet.has(it) ? "lc" : REAGENTS.has(it) ? "reagent" : (excludeTier && isTierName(it)) ? "tier" : null;
   const meta = {};              // player -> {cls}
   const alloc = {};             // player -> {item: points}
   const receivedTokens = new Set(); // player\0item obtained (TMB received)
   const crossed = new Set();    // player\0item wishlist rows crossed off
-  const listedItems = new Set();
-  const budgetPlayers = new Set();
   const ensure = (p, cls) => { if (!meta[p]) meta[p] = { cls: cls || "" }; if (cls && !meta[p].cls) meta[p].cls = cls; if (!alloc[p]) alloc[p] = {}; };
-
-  (budgetRows || []).forEach(r => {
-    const p = (r.Player || "").trim(); if (!p) return;
-    const it = (r.Item || "").trim(); if (!it) return;
-    const v = parseFloat(r.Points) || 0;
-    ensure(p, (r.Class || "").trim()); budgetPlayers.add(p);
-    alloc[p][it] = (alloc[p][it] || 0) + v; listedItems.add(it);
-  });
 
   (tmbRows || []).forEach(r => {
     const p = (r.character_name || "").trim(); if (!p) return;
     ensure(p, r.character_class);
     const it = (r.item_name || "").trim(); if (!it) return;
     if (r.type === "received") { receivedTokens.add(pairKey(p, it)); return; }
-    if (r.type === "wishlist") {
-      listedItems.add(it);
-      if ((r.received_at || "").trim()) crossed.add(pairKey(p, it));
-    }
+    if (r.type === "wishlist" && (r.received_at || "").trim()) crossed.add(pairKey(p, it));
   });
 
-  // Derive base points for TMB-only players (no budget submission) from sort_order rank.
-  const tmbWish = {}; // player -> [{item,sort}]
-  (tmbRows || []).forEach(r => { if (r.type !== "wishlist") return; const p = (r.character_name || "").trim(); const it = (r.item_name || "").trim(); if (!p || !it) return; if (crossed.has(pairKey(p, it))) return; (tmbWish[p] = tmbWish[p] || []).push({ item: it, sort: parseInt(r.sort_order) || 0 }); });
+  // Base points come from wishlist-item notes; players with no note-bids fall back to
+  // sort_order-derived auto-allocation. Officer overrides layer on top of either.
+  const tmbWish = {};  // player -> [{item,sort,bid}]
+  (tmbRows || []).forEach(r => {
+    if (r.type !== "wishlist") return;
+    const p = (r.character_name || "").trim(); const it = (r.item_name || "").trim();
+    if (!p || !it) return; if (crossed.has(pairKey(p, it))) return;
+    (tmbWish[p] = tmbWish[p] || []).push({ item: it, sort: parseInt(r.sort_order) || 0, bid: parseBidNote(r.note) });
+  });
+  const budgetMode = {};
   Object.keys(tmbWish).forEach(p => {
-    if (budgetPlayers.has(p)) return;
-    const list = tmbWish[p].filter(x => !excluded(x.item));
-    if (!list.length) return;
-    const N = list.length; const wsum = list.reduce((a, _, i) => a + (N - i), 0) || 1;
-    list.sort((a, b) => a.sort - b.sort);
-    list.forEach((x, i) => { alloc[p][x.item] = Math.max(1, Math.round(BUDGET * (N - i) / wsum)); });
+    const noted = tmbWish[p].filter(x => x.bid !== null && x.bid > 0);
+    if (noted.length) {
+      budgetMode[p] = "notes";
+      noted.forEach(x => { alloc[p][x.item] = (alloc[p][x.item] || 0) + x.bid; });
+    } else {
+      budgetMode[p] = "auto";
+      const list = tmbWish[p].filter(x => !excluded(x.item));
+      if (!list.length) return;
+      const N = list.length; const wsum = list.reduce((a, _, i) => a + (N - i), 0) || 1;
+      list.sort((a, b) => a.sort - b.sort);
+      list.forEach((x, i) => { alloc[p][x.item] = Math.max(1, Math.round(BUDGET * (N - i) / wsum)); });
+    }
+    const ov = (ptsOverrides || {})[p];
+    if (ov) Object.entries(ov).forEach(([it, v]) => { const n = +v || 0; if (n > 0) alloc[p][it] = n; else delete alloc[p][it]; });
+  });
+
+  // per-player budget audit (pre-award totals; excluded categories don't count toward the budget)
+  const budgets = {};
+  Object.keys(alloc).forEach(p => {
+    const rows = Object.entries(alloc[p]).map(([it, pts]) => ({ item: it, pts, not: excluded(it) })).sort((a, b) => b.pts - a.pts);
+    if (!rows.length) return;
+    budgets[p] = { total: rows.filter(r => !r.not).reduce((a, r) => a + r.pts, 0), mode: budgetMode[p] || "auto", edited: !!((ptsOverrides || {})[p] && Object.keys(ptsOverrides[p]).length), items: rows };
   });
 
   const allPlayers = new Set([...Object.keys(meta), ...Object.keys(baseStats || {})]);
@@ -122,7 +136,7 @@ export function compute(tmbRows, budgetRows, baseStats, awardLog, drops, mod, ex
   });
 
   const counts = { total: items.length, uncontested: items.filter(i => i.status === "UNCONTESTED").length, clear: items.filter(i => i.status === "CLEAR").length, roll: items.filter(i => i.status === "ROLL").length, contested: items.filter(i => i.count > 1).length };
-  return { items, players, counts, meta, logView, allPlayers: [...allPlayers] };
+  return { items, players, counts, meta, logView, budgets, allPlayers: [...allPlayers] };
 }
 
 // ── localStorage ──

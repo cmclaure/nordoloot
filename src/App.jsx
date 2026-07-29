@@ -1,15 +1,14 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import Papa from 'papaparse'
-import { CC, BT, MH, RAID_BOSSES, BL, ITEM_BOSSES, BUDGET, isTierName, REAGENTS, MOD_DEF, DEF_STATS, DEFAULT_LC } from './constants.js'
+import { CC, BT, MH, RAID_BOSSES, BUDGET, MOD_DEF, DEF_STATS, DEFAULT_LC } from './constants.js'
 import { compute, LS, loadLS } from './engine.js'
 
 export default function App() {
   const saved = useRef(loadLS());
   const s0 = saved.current || {};
   const [tmbRows, setTmb] = useState(s0.tmbRows || null);
-  const [budgetRows, setBudget] = useState(s0.budgetRows || null);
   const [tmbName, setTmbName] = useState(s0.tmbName || "");
-  const [budgetName, setBudgetName] = useState(s0.budgetName || "");
+  const [ptsOverrides, setPtsOverrides] = useState(s0.ptsOverrides || {});  // player -> {item: pts} officer edits, survive re-imports
   const [baseStats, setBaseStats] = useState(s0.baseStats || {});
   const [awardLog, setAwardLog] = useState(s0.awardLog || []);
   const [drops, setDrops] = useState(s0.drops || []);
@@ -38,41 +37,35 @@ export default function App() {
   const [lcNew, setLcNew] = useState("");
   const [lcAddP, setLcAddP] = useState(null);
   const [lcNewP, setLcNewP] = useState("");
-  // budget builder (player mode) + submission-string import (officer mode)
-  const [bbTab, setBbTab] = useState("player");
-  const [bbName, setBbName] = useState("");
-  const [bbCls, setBbCls] = useState("");
-  const [bbAlloc, setBbAlloc] = useState({});    // item -> points
-  const [bbString, setBbString] = useState(null);
-  const [bbCopied, setBbCopied] = useState(false);
-  const [subText, setSubText] = useState("");
-  const [subResults, setSubResults] = useState(null);
+  // budgets audit view
+  const [bgExpand, setBgExpand] = useState(null);  // player whose item list is open
 
   const lcNames = useMemo(() => lcItems.map(l => l.name), [lcItems]);
-  const data = useMemo(() => (tmbRows || budgetRows) ? compute(tmbRows, budgetRows, baseStats, awardLog, drops, mod, excludeTier, lcNames) : null,
-    [tmbRows, budgetRows, baseStats, awardLog, drops, mod, excludeTier, lcNames]);
+  const data = useMemo(() => tmbRows ? compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcNames) : null,
+    [tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcNames]);
 
   // init/merge player stats when data players change
   useEffect(() => { if (!data) return; setBaseStats(prev => { let ch = false; const n = { ...prev }; data.allPlayers.forEach(p => { if (!n[p]) { n[p] = { ...DEF_STATS }; ch = true } }); return ch ? n : prev; }); }, [data]);
 
   // persist
   useEffect(() => {
-    const payload = { tmbRows, budgetRows, tmbName, budgetName, baseStats, awardLog, drops, mod, excludeTier, lcItems };
+    const payload = { tmbRows, tmbName, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems };
     try { localStorage.setItem(LS, JSON.stringify(payload)); setSavedFlash(true); const t = setTimeout(() => setSavedFlash(false), 900); return () => clearTimeout(t); } catch (e) { }
-  }, [tmbRows, budgetRows, tmbName, budgetName, baseStats, awardLog, drops, mod, excludeTier, lcItems]);
+  }, [tmbRows, tmbName, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems]);
 
-  const importCSV = useCallback((file, kind) => {
+  const importCSV = useCallback((file) => {
     if (!file) return;
     const rd = new FileReader();
     rd.onload = e => {
       const res = Papa.parse(e.target.result, { header: true, skipEmptyLines: true });
-      if (kind === "tmb") { setTmb(res.data); setTmbName(file.name); }
-      else { setBudget(res.data); setBudgetName(file.name); }
+      setTmb(res.data); setTmbName(file.name);
     };
     rd.readAsText(file);
   }, []);
 
   const setStat = useCallback((p, k, v) => setBaseStats(prev => ({ ...prev, [p]: { ...(prev[p] || DEF_STATS), [k]: v === "" ? 0 : (parseFloat(v) || 0) } })), []);
+  const setOverride = useCallback((p, item, v) => setPtsOverrides(prev => ({ ...prev, [p]: { ...(prev[p] || {}), [item]: v === "" ? 0 : Math.max(0, parseInt(v) || 0) } })), []);
+  const clearOverrides = useCallback(p => setPtsOverrides(prev => { const n = { ...prev }; delete n[p]; return n; }), []);
 
   const doAward = useCallback((item, pick) => {
     const winner = item.status === "ROLL" ? pick : item.winner;
@@ -85,7 +78,7 @@ export default function App() {
   const doDrop = useCallback((player, item) => { setDrops(prev => [...prev, { player, item, ts: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }]); setDropTarget(null); }, []);
   const restoreDrop = useCallback(i => setDrops(prev => prev.filter((_, j) => j !== i)), []);
 
-  const reset = useCallback(() => { localStorage.removeItem(LS); setTmb(null); setBudget(null); setTmbName(""); setBudgetName(""); setBaseStats({}); setAwardLog([]); setDrops([]); setMod(MOD_DEF); setExcludeTier(true); setLcItems(DEFAULT_LC()); setConfirmReset(false); setView("scores"); setBbName(""); setBbCls(""); setBbAlloc({}); setBbString(null); setSubText(""); setSubResults(null); }, []);
+  const reset = useCallback(() => { localStorage.removeItem(LS); setTmb(null); setTmbName(""); setPtsOverrides({}); setBaseStats({}); setAwardLog([]); setDrops([]); setMod(MOD_DEF); setExcludeTier(true); setLcItems(DEFAULT_LC()); setConfirmReset(false); setView("scores"); setBgExpand(null); }, []);
 
   // filtered items
   const filtered = useMemo(() => {
@@ -98,6 +91,9 @@ export default function App() {
   }, [data, filter, search, boss]);
 
   const activeBosses = useMemo(() => { if (!data) return {}; const set = new Set(data.items.flatMap(i => i.bosses)); const out = {}; Object.entries(RAID_BOSSES).forEach(([r, bs]) => { const f = bs.filter(b => set.has(b)); if (f.length) out[r] = f; }); return out; }, [data]);
+
+  // players whose submitted (note-based or officer-edited) budget isn't exactly 500 — auto players aren't flagged
+  const offBudget = useMemo(() => { if (!data) return []; return Object.entries(data.budgets).filter(([, b]) => (b.mode === "notes" || b.edited) && b.total !== BUDGET).map(([p, b]) => ({ player: p, ...b })); }, [data]);
 
   const raidBossList = useMemo(() => { if (!raid) return []; if (raid === "Both") return [...RAID_BOSSES[BT], ...RAID_BOSSES[MH]]; return RAID_BOSSES[raid]; }, [raid]);
   const curBoss = raidBossList[bossIdx];
@@ -120,148 +116,6 @@ export default function App() {
   const lcRemP = (li, si) => setLcItems(p => { const n = [...p]; n[li] = { ...n[li], shortlist: n[li].shortlist.filter((_, j) => j !== si) }; return n });
   const lcMove = (li, si, d) => setLcItems(p => { const n = [...p]; const sl = [...n[li].shortlist]; const ni = si + d; if (ni < 0 || ni >= sl.length) return p; [sl[si], sl[ni]] = [sl[ni], sl[si]]; n[li] = { ...n[li], shortlist: sl }; return n });
   const lcCycle = (li, si) => { const S = ["", "NEXT", "IN LINE", "RECEIVED"]; setLcItems(p => { const n = [...p]; const sl = [...n[li].shortlist]; const cur = S.indexOf(sl[si].status); sl[si] = { ...sl[si], status: S[(cur + 1) % S.length] }; n[li] = { ...n[li], shortlist: sl }; return n }); };
-
-  // ── budget builder + submission strings ──
-  const bbTotal = Object.values(bbAlloc).reduce((a, b) => a + b, 0);
-  const bbRemaining = BUDGET - bbTotal;
-  const bbEligible = it => !lcNames.includes(it) && !REAGENTS.has(it) && !(excludeTier && isTierName(it));
-  const bbToggle = it => { setBbString(null); setBbAlloc(prev => { if (prev[it] !== undefined) { const n = { ...prev }; delete n[it]; return n; } const spent = Object.values(prev).reduce((a, b) => a + b, 0); if (spent >= BUDGET) return prev; return { ...prev, [it]: Math.min(10, BUDGET - spent) }; }); };
-  const bbSetPts = (it, v) => { setBbString(null); setBbAlloc(prev => { if (prev[it] === undefined) return prev; const others = Object.entries(prev).reduce((a, [k, x]) => k === it ? a : a + x, 0); const n = Math.max(1, Math.min(Math.round(+v || 1), BUDGET - others)); return { ...prev, [it]: n }; }); };
-  const bbGenerate = () => { const nm = bbName.trim(); if (!nm || !Object.keys(bbAlloc).length || bbTotal > BUDGET) return; setBbString("NDL1|" + btoa(unescape(encodeURIComponent(JSON.stringify({ p: nm, c: bbCls, a: bbAlloc }))))); setBbCopied(false); };
-  const bbCopy = () => { navigator.clipboard.writeText(bbString); setBbCopied(true); setTimeout(() => setBbCopied(false), 1500); };
-
-  const subParse = () => {
-    const tokens = subText.match(/NDL[^|\s]*\|[A-Za-z0-9+/=]+/g) || [];
-    const out = []; const seenIdx = {};
-    tokens.forEach((tok, i) => {
-      const bar = tok.indexOf("|"); const tag = tok.slice(0, bar); const b64 = tok.slice(bar + 1);
-      const row = { n: i + 1, player: "—", cls: "", count: 0, total: 0, reason: null, alloc: null, superseded: false };
-      if (tag !== "NDL1") { row.reason = `unsupported version "${tag}"`; out.push(row); return; }
-      let o = null;
-      try { o = JSON.parse(decodeURIComponent(escape(atob(b64)))); } catch (e) { row.reason = "unreadable — corrupted string"; out.push(row); return; }
-      row.player = (o.p || "").trim() || "—"; row.cls = o.c || "";
-      const alloc = o.a || {}; const its = Object.keys(alloc);
-      row.count = its.length; row.total = its.reduce((a, k) => a + (+alloc[k] || 0), 0);
-      if (row.player === "—") row.reason = "missing player name";
-      else if (!its.length) row.reason = "no items";
-      else {
-        const unknown = its.filter(k => !ITEM_BOSSES[k]);
-        const bad = its.filter(k => !(Number.isInteger(+alloc[k]) && +alloc[k] >= 1));
-        if (unknown.length) row.reason = "unknown item: " + unknown.join(", ");
-        else if (bad.length) row.reason = "invalid points: " + bad.join(", ");
-        else if (row.total > BUDGET) row.reason = `over budget (${row.total}/${BUDGET})`;
-      }
-      if (!row.reason) { row.alloc = alloc; if (seenIdx[row.player] !== undefined) out[seenIdx[row.player]].superseded = true; seenIdx[row.player] = out.length; }
-      out.push(row);
-    });
-    setSubResults(out);
-  };
-  const subAccepted = (subResults || []).filter(r => r.alloc && !r.superseded);
-  const subApply = () => {
-    if (!subAccepted.length) return;
-    const ps = new Set(subAccepted.map(r => r.player));
-    const rows = subAccepted.flatMap(r => Object.entries(r.alloc).map(([it, pts]) => ({ Player: r.player, Class: r.cls, Item: it, Points: String(pts) })));
-    setBudget(prev => [...(prev || []).filter(r => !ps.has((r.Player || "").trim())), ...rows]);
-    setBudgetName("pasted submissions");
-    setSubResults(null); setSubText("");
-  };
-
-  const bbBarColor = bbTotal === BUDGET ? "#4ade80" : bbTotal >= BUDGET * 0.6 ? "#fbbf24" : "#3FC7EB";
-  const budgetContent = (
-    <div>
-      <div style={{ display: "flex", gap: 4, marginBottom: 12 }}>
-        {[["player", "Build My Budget"], ["officer", "Officer Import"]].map(([t, l]) => (
-          <button key={t} className={"btn" + (bbTab === t ? " active" : "")} onClick={() => setBbTab(t)}>{l}</button>))}
-      </div>
-      {bbTab === "player" ? (<>
-        <div className="card"><div style={{ padding: "12px 14px", display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-          <input type="text" placeholder="Character name…" value={bbName} onChange={e => { setBbName(e.target.value); setBbString(null); }} style={{ padding: "6px 10px", fontSize: 13, width: 220 }} />
-          <select value={bbCls} onChange={e => { setBbCls(e.target.value); setBbString(null); }} style={{ color: CC[bbCls] || "#888", fontSize: 12, padding: "5px 8px" }}>
-            <option value="">Class…</option>
-            {Object.keys(CC).map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
-          <span className="sub">Spend your {BUDGET}-point budget. Lists are blind — bid what each item is worth to you.</span>
-        </div></div>
-        <div className="card" style={{ position: "sticky", top: 8, zIndex: 5 }}><div style={{ padding: "10px 14px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-            <span style={{ fontWeight: 600, fontSize: 12 }}>Budget</span>
-            <span style={{ fontWeight: 700, color: bbBarColor }}>{bbTotal} / {BUDGET}</span>
-          </div>
-          <div style={{ height: 16, background: "#111", border: "1px solid #2a2a2a", borderRadius: 5, overflow: "hidden" }}>
-            <div style={{ height: "100%", width: Math.min(100, bbTotal / BUDGET * 100) + "%", background: bbBarColor, transition: "width .2s" }} />
-          </div>
-          {bbRemaining > 0 && bbTotal > 0 && <div className="sub" style={{ marginTop: 4, color: "#fbbf24" }}>⚠ {bbRemaining} points unspent — allowed, but weaker bids.</div>}
-          {bbRemaining === 0 && <div className="sub" style={{ marginTop: 4, color: "#4ade80" }}>✓ Exactly {BUDGET} allocated.</div>}
-        </div></div>
-        <div className="card">
-          <div className="card-h"><span style={{ fontWeight: 600, fontSize: 12 }}>Your picks <span className="dim">({Object.keys(bbAlloc).length})</span></span></div>
-          <div style={{ padding: "6px 14px 10px" }}>
-            {Object.entries(bbAlloc).map(([it, pts]) => (
-              <div key={it} style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 0", borderBottom: "1px solid #141414" }}>
-                <span style={{ flex: 1, fontSize: 12 }}>{it} <span className="sub">{(ITEM_BOSSES[it] || []).join(" · ")}</span></span>
-                <input className="stat-input" type="number" min="1" max={BUDGET} value={pts} onChange={e => bbSetPts(it, e.target.value)} />
-                <button className="btn-undo" onClick={() => bbToggle(it)}>✕</button>
-              </div>))}
-            {!Object.keys(bbAlloc).length && <div className="sub" style={{ padding: "4px 0" }}>Pick items from the boss lists below.</div>}
-          </div>
-        </div>
-        {Object.entries(RAID_BOSSES).map(([r, bosses]) => (
-          <div className="card" key={r}>
-            <div className="card-h"><span className="gold" style={{ fontWeight: 600, fontSize: 13 }}>{r}</span></div>
-            <div style={{ padding: "6px 14px 10px" }}>
-              {bosses.map(b => {
-                const its = (BL[b] || []).filter(bbEligible);
-                if (!its.length) return null;
-                return (
-                  <details key={b}>
-                    <summary style={{ cursor: "pointer", padding: "5px 0", fontWeight: 600, fontSize: 12 }}>{b} <span className="dim">({its.length})</span></summary>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 4, padding: "4px 0 8px" }}>
-                      {its.map(it => { const sel = bbAlloc[it] !== undefined; return (
-                        <button key={it} className="btn btn-sm" onClick={() => bbToggle(it)} style={{ textTransform: "none", fontSize: 11, color: sel ? "#fbbf24" : "#888", borderColor: sel ? "#fbbf24" : "#2a2a2a" }}>{sel ? "✓ " : ""}{it}</button>); })}
-                    </div>
-                  </details>);
-              })}
-            </div>
-          </div>))}
-        <div style={{ textAlign: "center", margin: "16px 0" }}>
-          <button className="btn" disabled={!bbName.trim() || !Object.keys(bbAlloc).length} onClick={bbGenerate} style={{ padding: "10px 24px", fontSize: 13, color: !bbName.trim() || !Object.keys(bbAlloc).length ? "#444" : "#4ade80", borderColor: "#2d4a2d" }}>🔒 Generate submission string</button>
-        </div>
-        {bbString && (
-          <div className="card"><div style={{ padding: "10px 14px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-              <span className="green" style={{ fontWeight: 600, fontSize: 12 }}>✓ Send this string to your officer</span>
-              <button className="btn btn-sm" onClick={bbCopy} style={{ color: "#4ade80" }}>{bbCopied ? "✓ Copied!" : "Copy submission"}</button>
-            </div>
-            <div className="discord-box" style={{ wordBreak: "break-all" }}>{bbString}</div>
-            <div className="sub" style={{ margin: "6px 0 2px" }}>Plaintext check — what's inside:</div>
-            <div className="discord-box">{`${bbName.trim()} (${bbCls || "no class"}) — ${bbTotal}/${BUDGET}\n` + Object.entries(bbAlloc).map(([it, p]) => `${it}: ${p}`).join("\n")}</div>
-          </div></div>)}
-      </>) : (
-        <div className="card"><div style={{ padding: "12px 14px" }}>
-          <div style={{ fontWeight: 600, marginBottom: 4, fontSize: 13 }}>Paste submission strings</div>
-          <div className="sub" style={{ marginBottom: 8 }}>One or many — whitespace or newlines between them. An accepted player replaces their previous submission. The Budget CSV import still works as a fallback.</div>
-          <textarea value={subText} onChange={e => { setSubText(e.target.value); setSubResults(null); }} placeholder="NDL1|…  NDL1|…" style={{ width: "100%", minHeight: 110, background: "#111", color: "#e0e0e0", border: "1px solid #2a2a2a", borderRadius: 6, padding: 10, fontFamily: "monospace", fontSize: 11, resize: "vertical" }} />
-          <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-            <button className="btn" onClick={subParse} style={{ color: "#3FC7EB" }}>Validate</button>
-            {subResults && subAccepted.length > 0 && <button className="btn" onClick={subApply} style={{ color: "#4ade80", borderColor: "#2d4a2d" }}>Import {subAccepted.length} accepted</button>}
-          </div>
-          {subResults && (
-            <div style={{ marginTop: 10, overflowX: "auto" }}>
-              {subResults.length ? (
-                <table><thead><tr><th>#</th><th>Player</th><th>Items</th><th>Total</th><th>Status</th></tr></thead>
-                  <tbody>{subResults.map(r => (
-                    <tr key={r.n}>
-                      <td className="dim">{r.n}</td>
-                      <td><span style={{ color: CC[r.cls] || "#ccc", fontWeight: 500 }}>{r.player}</span></td>
-                      <td>{r.count}</td>
-                      <td>{r.total}</td>
-                      <td>{r.reason ? <span className="red" style={{ fontSize: 11 }}>✕ {r.reason}</span> : r.superseded ? <span style={{ color: "#fbbf24", fontSize: 11 }}>⚠ duplicate — superseded by a later submission</span> : <span className="green" style={{ fontSize: 11 }}>✓ OK</span>}</td>
-                    </tr>))}</tbody></table>
-              ) : <div className="sub">No NDL…| strings found in the paste.</div>}
-            </div>)}
-        </div></div>
-      )}
-    </div>);
 
   const PN = ({ name, cls, click = true }) => <span className={click ? "plink" : ""} onClick={click ? () => setProfile(name) : undefined} style={{ color: CC[cls] || "#ccc", cursor: click ? "pointer" : "default" }}>{name}</span>;
 
@@ -305,29 +159,19 @@ export default function App() {
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
           <span className={"saved" + (savedFlash ? " pending" : "")}>{savedFlash ? "● Saving…" : "● Saved"}</span>
-          <label className={"upload-zone" + (drag === "tmb" ? " drag" : "") + (tmbName ? " loaded" : "")} onDragOver={e => { e.preventDefault(); setDrag("tmb") }} onDragLeave={() => setDrag(null)} onDrop={e => { e.preventDefault(); setDrag(null); importCSV(e.dataTransfer.files[0], "tmb") }} style={{ cursor: "pointer" }}>
+          <label className={"upload-zone" + (drag === "tmb" ? " drag" : "") + (tmbName ? " loaded" : "")} onDragOver={e => { e.preventDefault(); setDrag("tmb") }} onDragLeave={() => setDrag(null)} onDrop={e => { e.preventDefault(); setDrag(null); importCSV(e.dataTransfer.files[0]) }} style={{ cursor: "pointer" }}>
             <span style={{ color: tmbName ? "#4ade80" : "#fbbf24", fontWeight: 500, fontSize: 11 }}>{tmbName ? "✓ " + tmbName : "Drop TMB CSV"}</span>
-            <input type="file" accept=".csv" onChange={e => importCSV(e.target.files[0], "tmb")} style={{ display: "none" }} />
-          </label>
-          <label className={"upload-zone" + (drag === "budget" ? " drag" : "") + (budgetName ? " loaded" : "")} onDragOver={e => { e.preventDefault(); setDrag("budget") }} onDragLeave={() => setDrag(null)} onDrop={e => { e.preventDefault(); setDrag(null); importCSV(e.dataTransfer.files[0], "budget") }} style={{ cursor: "pointer" }}>
-            <span style={{ color: budgetName ? "#4ade80" : "#fbbf24", fontWeight: 500, fontSize: 11 }}>{budgetName ? "✓ " + budgetName : "Drop Budget CSV"}</span>
-            <input type="file" accept=".csv" onChange={e => importCSV(e.target.files[0], "budget")} style={{ display: "none" }} />
+            <input type="file" accept=".csv" onChange={e => importCSV(e.target.files[0])} style={{ display: "none" }} />
           </label>
           <button className="btn" onClick={() => setConfirmReset(true)} style={{ color: "#f87171", borderColor: "#4a2d2d" }}>Reset</button>
         </div>
       </div>
 
-      {view === "budget" ? (
-        <div>
-          <div style={{ marginBottom: 10 }}><button className="btn" onClick={() => setView("scores")}>← Back</button></div>
-          {budgetContent}
-        </div>
-      ) : !hasData ? (
+      {!hasData ? (
         <div style={{ textAlign: "center", padding: "70px 0", color: "#444" }}>
           <div style={{ fontSize: 40, marginBottom: 10 }}>⚔️</div>
-          <div style={{ fontSize: 14, color: "#666" }}>Import a Budget CSV (and optionally a TMB export) to begin.</div>
-          <div className="sub" style={{ marginTop: 8 }}>Budget format: <code>Player, Item, Points</code> · everything saves to your browser automatically.</div>
-          <div style={{ marginTop: 18 }}><button className="btn" onClick={() => setView("budget")} style={{ color: "#fbbf24", borderColor: "#4a3d1a", padding: "8px 16px", fontSize: 12 }}>⚒ Budget Builder &amp; Submission Import</button></div>
+          <div style={{ fontSize: 14, color: "#666" }}>Import a TMB export to begin.</div>
+          <div className="sub" style={{ marginTop: 8 }}>Raiders put their point bid (just the number, e.g. <code>300</code>) in each wishlist item's note on ThatsmyBIS. Players with no note-bids get rank-derived auto points. Everything saves to your browser automatically.</div>
         </div>
       ) : (<>
         {/* session logs */}
@@ -357,9 +201,19 @@ export default function App() {
             <div key={l} style={{ background: bg, borderRadius: 4, padding: 8, textAlign: "center" }}><div style={{ fontSize: 20, fontWeight: 700, color: co }}>{c}</div><div className="sub">{l}</div></div>))}
         </div>
 
+        {/* off-budget warning */}
+        {offBudget.length > 0 && (
+          <div className="log" style={{ borderColor: "#4a3d1a", cursor: "pointer" }} onClick={() => setView("budget")} title="Open Budgets tab">
+            <span className="gold" style={{ fontWeight: 600, fontSize: 10, textTransform: "uppercase" }}>⚠ {offBudget.length} raider{offBudget.length > 1 ? "s" : ""} off-budget: </span>
+            <span style={{ fontSize: 11 }}>{offBudget.map((b, i) => (
+              <span key={b.player}>{i > 0 && <span className="dim"> · </span>}<PN name={b.player} cls={data.players[b.player]?.cls} click={false} /> <span className={b.total > BUDGET ? "red" : "gold"}>{b.total}</span></span>))}
+            </span>
+            <span className="sub" style={{ marginLeft: 8 }}>click to review in Budgets</span>
+          </div>)}
+
         {/* nav */}
         <div style={{ display: "flex", background: "#1a1a1a", borderRadius: 4, overflow: "hidden", border: "1px solid #2a2a2a", marginBottom: 12, flexWrap: "wrap" }}>
-          {[["scores", "Scores"], ["raid", "Raid Night"], ["contested", "Contested"], ["lc", "LC Items"], ["players", "Players"], ["mods", "Modifiers"], ["budget", "Budget"]].map(([v, l]) => (
+          {[["scores", "Scores"], ["raid", "Raid Night"], ["contested", "Contested"], ["lc", "LC Items"], ["players", "Players"], ["budget", "Budgets"], ["mods", "Modifiers"]].map(([v, l]) => (
             <button key={v} className="view-btn" onClick={() => setView(v)} style={{ background: view === v ? "#2a2a2a" : "transparent", color: view === v ? "#fbbf24" : "#555" }}>{l}</button>))}
         </div>
 
@@ -476,6 +330,41 @@ export default function App() {
               })}</tbody></table>
             <div className="sub" style={{ marginTop: 6 }}>Wins/BLP arrows show session-adjusted values (base edit + auto-increments from awards). Click a name for full profile.</div>
           </div>)}
+
+        {/* ══ BUDGETS ══ */}
+        {view === "budget" && (<div>
+          <div className="sub" style={{ marginBottom: 8 }}>Point bids come from each wishlist item's note in the TMB export (a bare number, e.g. <code>300</code>). Players with no note-bids get rank-derived auto points and aren't checked against the {BUDGET} budget. Officer edits persist and survive re-imports.</div>
+          <div style={{ overflowX: "auto", maxHeight: "calc(100vh - 300px)", overflowY: "auto" }}>
+            <table><thead><tr><th>Player</th><th>Source</th><th>Items</th><th>Total</th><th>Status</th><th></th></tr></thead>
+              <tbody>{Object.keys(data.budgets).sort((a, b) => a.localeCompare(b)).map(p => {
+                const b = data.budgets[p];
+                const checked = b.mode === "notes" || b.edited;
+                const diff = b.total - BUDGET;
+                return (<React.Fragment key={p}>
+                  <tr>
+                    <td><PN name={p} cls={data.players[p]?.cls} /></td>
+                    <td>{b.mode === "notes" ? <span className="tag tag-u">NOTES</span> : <span className="tag" style={{ background: "#1a1a1a", color: "#666", border: "1px solid #2a2a2a" }}>AUTO</span>}{b.edited && <span className="tag tag-c" style={{ marginLeft: 4 }}>EDITED</span>}</td>
+                    <td>{b.items.length}</td>
+                    <td style={{ fontWeight: 700, color: !checked ? "#888" : diff === 0 ? "#4ade80" : diff > 0 ? "#f87171" : "#fbbf24" }}>{b.total}</td>
+                    <td>{!checked ? <span className="dim" style={{ fontSize: 10 }}>—</span> : diff === 0 ? <span className="green" style={{ fontSize: 11 }}>✓ exactly {BUDGET}</span> : diff > 0 ? <span className="red" style={{ fontSize: 11 }}>✕ {diff} over</span> : <span className="gold" style={{ fontSize: 11 }}>⚠ {-diff} under</span>}</td>
+                    <td style={{ whiteSpace: "nowrap" }}>
+                      <button className="btn-detail" onClick={() => setBgExpand(bgExpand === p ? null : p)}>{bgExpand === p ? "Close" : "Adjust"}</button>{" "}
+                      {b.edited && <button className="btn-undo" onClick={() => clearOverrides(p)}>Clear edits</button>}
+                    </td>
+                  </tr>
+                  {bgExpand === p && (
+                    <tr><td colSpan={6} style={{ background: "#141414", padding: "8px 14px" }}>
+                      {b.items.map(r => (
+                        <div key={r.item} style={{ display: "flex", alignItems: "center", gap: 8, padding: "3px 0" }}>
+                          <span style={{ flex: 1, fontSize: 12, color: r.not ? "#555" : "#e0e0e0" }}>{r.item}{r.not && <span className="sub" style={{ marginLeft: 6 }}>not counted ({r.not})</span>}</span>
+                          <input className="stat-input" type="number" min="0" value={r.pts} onChange={e => setOverride(p, r.item, e.target.value)} />
+                        </div>))}
+                      <div className="sub" style={{ marginTop: 6 }}>Adjust after talking to the raider — no re-import needed. 0 removes the claim. Re-importing the TMB file keeps these edits.</div>
+                    </td></tr>)}
+                </React.Fragment>);
+              })}</tbody></table>
+          </div>
+        </div>)}
 
         {/* ══ MODIFIERS ══ */}
         {view === "mods" && (<div style={{ maxWidth: 640 }}>
