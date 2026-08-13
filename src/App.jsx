@@ -16,7 +16,7 @@ export default function App() {
   const [awardLog, setAwardLog] = useState(s0.awardLog || []);
   const [drops, setDrops] = useState(s0.drops || []);
   const [mod, setMod] = useState(() => mergeMod(s0.mod));
-  const [excludeTier, setExcludeTier] = useState(s0.excludeTier !== undefined ? s0.excludeTier : true);
+  const [excludeTier, setExcludeTier] = useState(s0.excludeTier !== undefined ? s0.excludeTier : false);
   const [lcItems, setLcItems] = useState(s0.lcItems || DEFAULT_LC());
 
   const [view, setView] = useState("scores");
@@ -95,7 +95,7 @@ export default function App() {
     setTmb(o.tmbRows || null); setTmbName(o.tmbName || "");
     setPtsOverrides(o.ptsOverrides || {}); setBaseStats(o.baseStats || {});
     setAwardLog(o.awardLog || []); setDrops(o.drops || []);
-    setMod(mergeMod(o.mod)); setExcludeTier(o.excludeTier !== undefined ? o.excludeTier : true);
+    setMod(mergeMod(o.mod)); setExcludeTier(o.excludeTier !== undefined ? o.excludeTier : false);
     setLcItems(o.lcItems || DEFAULT_LC());
     setPendingImport(null); setView("scores"); setRaid(null); setBossIdx(0); setBgExpand(null); setProfile(null); setDetail(null);
   }, [pendingImport]);
@@ -121,7 +121,7 @@ export default function App() {
   const doDrop = useCallback((player, item) => { setDrops(prev => [...prev, { player, item, ts: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }]); setDropTarget(null); }, []);
   const restoreDrop = useCallback(i => setDrops(prev => prev.filter((_, j) => j !== i)), []);
 
-  const reset = useCallback(() => { localStorage.removeItem(LS); setTmb(null); setTmbName(""); setPtsOverrides({}); setBaseStats({}); setAwardLog([]); setDrops([]); setMod(MOD_DEF); setExcludeTier(true); setLcItems(DEFAULT_LC()); setConfirmReset(false); setView("scores"); setBgExpand(null); }, []);
+  const reset = useCallback(() => { localStorage.removeItem(LS); setTmb(null); setTmbName(""); setPtsOverrides({}); setBaseStats({}); setAwardLog([]); setDrops([]); setMod(MOD_DEF); setExcludeTier(false); setLcItems(DEFAULT_LC()); setConfirmReset(false); setView("scores"); setBgExpand(null); }, []);
 
   // filtered items
   const filtered = useMemo(() => {

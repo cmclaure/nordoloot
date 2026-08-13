@@ -17,7 +17,8 @@ Or skip the terminal entirely: run `npm run build` once and open `dist/index.htm
 - Raiders enter their bid in the item's **Note** field on ThatsmyBIS — just the number (`300` or `300 pts`).
 - Bids are **blind** — nobody sees anyone else's numbers.
 - **Highest score wins.** Ties go to /roll.
-- Tier tokens, Loot Council items, and crafting reagents are **outside the budget** — don't spend points on them.
+- Tier tokens count like any other item — bid on the **token name** (e.g. "Helm of the Forgotten Vanquisher"), not your class piece.
+- Loot Council items and crafting reagents are **outside the budget** — don't spend points on them.
 - Raiders who don't enter any bids get automatic points based on their wishlist order.
 - **Points are spent when you win.** Win an item and the points you bid on it are gone — they don't move to your other items.
 
@@ -41,7 +42,7 @@ Or skip the terminal entirely: run `npm run build` once and open `dist/index.htm
 ## Scoring
 
 ```
-final = bid + attendance + tenure − prior wins − unexcused absences
+final = bid + attendance + tenure + bad-luck protection − unexcused absences
 ```
 
 Each piece can be toggled and weighted on the **Modifiers** tab — the live formula there always shows exactly what's being calculated.
