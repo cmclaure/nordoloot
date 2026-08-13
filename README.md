@@ -47,6 +47,8 @@ final = bid + attendance + tenure + bad-luck protection − unexcused absences
 
 Each piece can be toggled and weighted on the **Modifiers** tab — the live formula there always shows exactly what's being calculated.
 
+Note on absences: marking out ahead of time avoids a strike, but it does not protect attendance — every missed raid lowers the attendance score, excused or not. Consistent absence costs points either way.
+
 ## Practice data
 
 `fake-tmb-export-p3-notes.csv` is a fake 28-player roster with bids already filled in — import it to click around safely before using real data.
