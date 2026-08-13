@@ -38,10 +38,9 @@ export const MOD_DEF = {
   att: { on: true, w: 20, label: "Attendance", sign: "+", desc: "% of raids attended. Rewards consistent raiders." },
   ten: { on: true, w: 30, label: "Tenure", sign: "+", desc: "Weeks in guild, capped at 4. Full veteran standing in the first month of the phase." },
   ua: { on: true, w: 25, label: "Unexcused Absence", sign: "−", desc: "Escalating penalty per no-show without notice: 1st = −25, 2nd = −75 total, 3rd = −150 total. Excused absences never count. Attending 4 consecutive raids clears one strike (officers decrement the counter manually)." },
-  pass: { on: false, w: 5, label: "Passing Bonus", sign: "+", desc: "Each voluntary pass adds bonus to all future scores. Rewards selflessness." },
   blp: { on: true, w: 3, label: "Bad Luck Protection", sign: "+", desc: "Each time a player is a contender but loses, their BLP counter lifts them gradually." },
 };
-export const DEF_STATS = { attendance: 100, tenure: 0, wins: 0, pass: 0, blp: 0, ua: 0 };
+export const DEF_STATS = { attendance: 100, tenure: 0, wins: 0, blp: 0, ua: 0 };
 
 export const DEFAULT_LC = () => [
   { name: "The Skull of Gul'dan", shortlist: [] },

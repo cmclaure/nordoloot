@@ -360,7 +360,7 @@ export default function App() {
         {/* ══ PLAYERS ══ */}
         {view === "players" && (
           <div style={{ overflowX: "auto", maxHeight: "calc(100vh - 300px)", overflowY: "auto" }}>
-            <table><thead><tr><th>Player</th><th>Class</th><th>Att %</th><th>Tenure (wk)</th><th>Wins</th><th>Pass</th><th>BLP</th><th title="Unexcused absences">UA</th><th>In line for</th></tr></thead>
+            <table><thead><tr><th>Player</th><th>Class</th><th>Att %</th><th>Tenure (wk)</th><th>Wins</th><th>BLP</th><th title="Unexcused absences">UA</th><th>In line for</th></tr></thead>
               <tbody>{data.allPlayers.slice().sort((a, b) => a.localeCompare(b)).map(p => {
                 const st = data.players[p].st; const b = baseStats[p] || DEF_STATS; return (
                   <tr key={p}>
@@ -369,7 +369,6 @@ export default function App() {
                     <td><input className="stat-input" value={b.attendance} onChange={e => setStat(p, "attendance", e.target.value)} /></td>
                     <td><input className="stat-input" value={b.tenure} onChange={e => setStat(p, "tenure", e.target.value)} /></td>
                     <td><input className="stat-input" value={b.wins} onChange={e => setStat(p, "wins", e.target.value)} /> {st.wins !== (+b.wins || 0) && <span className="gold" style={{ fontSize: 10 }}>→{st.wins}</span>}</td>
-                    <td><input className="stat-input" value={b.pass} onChange={e => setStat(p, "pass", e.target.value)} /></td>
                     <td><input className="stat-input" value={b.blp} onChange={e => setStat(p, "blp", e.target.value)} /> {st.blp !== (+b.blp || 0) && <span className="gold" style={{ fontSize: 10 }}>→{st.blp}</span>}</td>
                     <td><input className="stat-input" value={b.ua ?? 0} onChange={e => setStat(p, "ua", e.target.value)} /></td>
                     <td className="green" style={{ fontWeight: 600 }}>{data.players[p].inLineFor}</td>
@@ -436,7 +435,6 @@ export default function App() {
             <div className="formula-box">{"final = base\n"
               + (mod.att.on ? `  + (attendance% ÷ 100 × ${mod.att.w})\n` : "")
               + (mod.ten.on ? `  + (min(tenure,4) ÷ 4 × ${mod.ten.w})\n` : "")
-              + (mod.pass.on ? `  + (passes × ${mod.pass.w})\n` : "")
               + (mod.blp.on ? `  + (blp × ${mod.blp.w})\n` : "")
               + (mod.ua.on ? `  − (${mod.ua.w} × strikes·(strikes+1)÷2)` : "")}</div>
             <div className="sub" style={{ marginTop: 10, lineHeight: 1.6 }}><b className="gold">Points are spent on win:</b> when a player wins an item, the base points they allocated to it are gone — they do not move to their remaining items. Budget allocations are one-shot bids.</div>
@@ -450,14 +448,13 @@ export default function App() {
           <div className="modal wide" onClick={e => e.stopPropagation()}>
             <h3>{detail.item} <span className="dim" style={{ fontSize: 11, fontWeight: 400 }}>{detail.bosses.join(" · ")}</span></h3>
             <div style={{ marginBottom: 10 }}><StatusTag s={detail.status} /> <span className="sub">{detail.count} contender{detail.count > 1 ? "s" : ""} · gap {detail.status === "ROLL" ? "tied" : "+" + detail.gap.toFixed(1)}</span></div>
-            <div style={{ overflowX: "auto" }}><table><thead><tr><th>Player</th><th>Base</th>{mod.att.on && <th>Att</th>}{mod.ten.on && <th>Ten</th>}{mod.pass.on && <th>Pass</th>}{mod.blp.on && <th>BLP</th>}{mod.ua.on && <th title="Unexcused absences">UA</th>}<th>Final</th><th></th></tr></thead>
+            <div style={{ overflowX: "auto" }}><table><thead><tr><th>Player</th><th>Base</th>{mod.att.on && <th>Att</th>}{mod.ten.on && <th>Ten</th>}{mod.blp.on && <th>BLP</th>}{mod.ua.on && <th title="Unexcused absences">UA</th>}<th>Final</th><th></th></tr></thead>
               <tbody>{detail.contenders.map((c, i) => (
                 <tr key={c.player} style={{ background: i === 0 ? "#141f14" : detail.tied.includes(c.player) ? "#241414" : "transparent" }}>
                   <td><PN name={c.player} cls={c.cls} />{i === 0 && detail.status !== "ROLL" && <span className="tag tag-c" style={{ marginLeft: 6 }}>WIN</span>}{detail.status === "ROLL" && detail.tied.includes(c.player) && <span className="tag tag-r" style={{ marginLeft: 6 }}>ROLL</span>}</td>
                   <td style={{ fontWeight: 600 }}>{c.base.toFixed(0)}</td>
                   {mod.att.on && <td className="green">+{c.parts.att.toFixed(1)}</td>}
                   {mod.ten.on && <td className="green">+{c.parts.ten.toFixed(1)}</td>}
-                  {mod.pass.on && <td className="green">+{c.parts.pass.toFixed(1)}</td>}
                   {mod.blp.on && <td className="green">+{c.parts.blp.toFixed(1)}</td>}
                   {mod.ua.on && <td className="red">{c.parts.ua ? c.parts.ua.toFixed(1) : <span className="dim">—</span>}</td>}
                   <td className="gold" style={{ fontWeight: 700 }}>{c.final.toFixed(1)}</td>

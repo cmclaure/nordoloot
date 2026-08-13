@@ -5,12 +5,11 @@ export function scoreParts(base, st, mod) {
   const p = { base: base };
   p.att = mod.att.on ? (st.attendance / 100) * mod.att.w : 0;
   p.ten = mod.ten.on ? (Math.min(st.tenure, 4) / 4) * mod.ten.w : 0;
-  p.pass = mod.pass.on ? st.pass * mod.pass.w : 0;
   p.blp = mod.blp.on ? st.blp * mod.blp.w : 0;
   // triangular escalation: n strikes cost w·n(n+1)/2. mod.ua guarded — saved pre-ua modifier state may lack it
   const ua = mod.ua && mod.ua.on ? (st.ua || 0) : 0;
   p.ua = ua > 0 ? -(mod.ua.w * ua * (ua + 1) / 2) : 0;
-  p.final = p.base + p.att + p.ten + p.pass + p.blp + p.ua;
+  p.final = p.base + p.att + p.ten + p.blp + p.ua;
   return p;
 }
 export const pairKey = (p, i) => p + "\0" + i;
@@ -73,7 +72,7 @@ export function compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, 
 
   const allPlayers = new Set([...Object.keys(meta), ...Object.keys(baseStats || {})]);
   allPlayers.forEach(p => ensure(p));
-  const statOf = (p, dw, db) => { const b = baseStats[p] || DEF_STATS; return { attendance: +b.attendance || 0, tenure: +b.tenure || 0, pass: +b.pass || 0, wins: (+b.wins || 0) + (dw[p] || 0), blp: (+b.blp || 0) + (db[p] || 0), ua: +b.ua || 0 }; };
+  const statOf = (p, dw, db) => { const b = baseStats[p] || DEF_STATS; return { attendance: +b.attendance || 0, tenure: +b.tenure || 0, wins: (+b.wins || 0) + (dw[p] || 0), blp: (+b.blp || 0) + (db[p] || 0), ua: +b.ua || 0 }; };
 
   // ── replay award log ──
   const work = {}; Object.keys(alloc).forEach(p => work[p] = { ...alloc[p] });
