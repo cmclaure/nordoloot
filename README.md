@@ -14,7 +14,7 @@ Or skip the terminal entirely: run `npm run build` once and open `dist/index.htm
 ## How the system works
 
 - Every raider gets a **500-point budget** to spread across their wishlist however they want. More points on an item = higher priority.
-- Raiders enter their bid in the item's **Note** field on ThatsmyBIS — just the number (`300` or `300 pts`).
+- Raiders enter their bid in the item's **Note** field on ThatsmyBIS — just the number (`100` or `100 pts`).
 - Bids are **blind** — nobody sees anyone else's numbers.
 - **Highest score wins.** Ties go to /roll.
 - Tier tokens count like any other item — bid on the **token name** (e.g. "Helm of the Forgotten Vanquisher"), not your class piece.

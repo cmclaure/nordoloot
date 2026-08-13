@@ -217,7 +217,7 @@ export default function App() {
         <div style={{ textAlign: "center", padding: "70px 0", color: "#444" }}>
           <div style={{ fontSize: 40, marginBottom: 10 }}>⚔️</div>
           <div style={{ fontSize: 14, color: "#666" }}>Import a TMB export to begin.</div>
-          <div className="sub" style={{ marginTop: 8 }}>Raiders put their point bid (just the number, e.g. <code>300</code>) in each wishlist item's note on ThatsmyBIS. Players with no note-bids get rank-derived auto points. Everything saves to your browser automatically.</div>
+          <div className="sub" style={{ marginTop: 8 }}>Raiders put their point bid (just the number, e.g. <code>100</code>) in each wishlist item's note on ThatsmyBIS. Players with no note-bids get rank-derived auto points. Everything saves to your browser automatically.</div>
         </div>
       ) : (<>
         {/* session logs */}
@@ -378,7 +378,7 @@ export default function App() {
 
         {/* ══ BUDGETS ══ */}
         {view === "budget" && (<div>
-          <div className="sub" style={{ marginBottom: 8 }}>Point bids come from each wishlist item's note in the TMB export (a bare number, e.g. <code>300</code>). Players with no note-bids get rank-derived auto points and aren't checked against the {BUDGET} budget. LC shortlist spots charge {LC_CHARGE} each toward the total. Officer edits persist and survive re-imports.</div>
+          <div className="sub" style={{ marginBottom: 8 }}>Point bids come from each wishlist item's note in the TMB export (a bare number, e.g. <code>100</code>). Players with no note-bids get rank-derived auto points and aren't checked against the {BUDGET} budget. LC shortlist spots charge {LC_CHARGE} each toward the total. Officer edits persist and survive re-imports.</div>
           <div style={{ overflowX: "auto", maxHeight: "calc(100vh - 300px)", overflowY: "auto" }}>
             <table><thead><tr><th>Player</th><th>Source</th><th>Items</th><th>Total</th><th>Status</th><th></th></tr></thead>
               <tbody>{Object.keys(data.budgets).sort((a, b) => a.localeCompare(b)).map(p => {
