@@ -1,6 +1,7 @@
 // WoW class colors
 export const CC = { Warrior: "#C69B6D", Paladin: "#F48CBA", Hunter: "#AAD372", Rogue: "#FFF468", Priest: "#FFFFFF", Shaman: "#0070DD", Mage: "#3FC7EB", Warlock: "#8788EE", Druid: "#FF7C0A" };
 export const BUDGET = 500;
+export const LC_CHARGE = 100;  // budget cost per LC shortlist spot (listed twice = charged twice)
 
 // ── Boss loot tables (verified, from spec) ──
 export const BT = "Black Temple", MH = "Mount Hyjal";

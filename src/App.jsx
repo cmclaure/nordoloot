@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import Papa from 'papaparse'
-import { CC, BT, MH, RAID_BOSSES, BUDGET, MOD_DEF, DEF_STATS, DEFAULT_LC } from './constants.js'
+import { CC, BT, MH, RAID_BOSSES, BUDGET, LC_CHARGE, MOD_DEF, DEF_STATS, DEFAULT_LC } from './constants.js'
 import { compute, LS, loadLS } from './engine.js'
 
 // merge a saved modifier object over MOD_DEF so keys added later pick up defaults
@@ -44,9 +44,8 @@ export default function App() {
   // save-file import: {data} awaiting confirm, or {error}
   const [pendingImport, setPendingImport] = useState(null);
 
-  const lcNames = useMemo(() => lcItems.map(l => l.name), [lcItems]);
-  const data = useMemo(() => tmbRows ? compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcNames) : null,
-    [tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcNames]);
+  const data = useMemo(() => tmbRows ? compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems) : null,
+    [tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems]);
 
   // init/merge player stats when data players change
   useEffect(() => { if (!data) return; setBaseStats(prev => { let ch = false; const n = { ...prev }; data.allPlayers.forEach(p => { if (!n[p]) { n[p] = { ...DEF_STATS }; ch = true } }); return ch ? n : prev; }); }, [data]);
@@ -327,7 +326,7 @@ export default function App() {
           <div style={{ display: "flex", gap: 6, marginBottom: 12, alignItems: "center" }}>
             <input type="text" placeholder="Add LC item by name…" value={lcNew} onChange={e => setLcNew(e.target.value)} onKeyDown={e => e.key === "Enter" && lcAddItem()} style={{ padding: "5px 8px", width: 280, fontSize: 12 }} />
             <button className="btn" onClick={lcAddItem} style={{ color: "#4ade80", borderColor: "#2d4a2d" }}>+ Add item</button>
-            <span className="sub">LC items are excluded from the point budget — managed as manual shortlists.</span>
+            <span className="sub">LC items are handled as manual shortlists — every shortlist spot charges {LC_CHARGE} points of that raider's budget (list someone twice, e.g. both glaives, and they're charged twice).</span>
           </div>
           {lcItems.map((lc, li) => (<div className="card" key={li}>
             <div className="card-h">
@@ -379,7 +378,7 @@ export default function App() {
 
         {/* ══ BUDGETS ══ */}
         {view === "budget" && (<div>
-          <div className="sub" style={{ marginBottom: 8 }}>Point bids come from each wishlist item's note in the TMB export (a bare number, e.g. <code>300</code>). Players with no note-bids get rank-derived auto points and aren't checked against the {BUDGET} budget. Officer edits persist and survive re-imports.</div>
+          <div className="sub" style={{ marginBottom: 8 }}>Point bids come from each wishlist item's note in the TMB export (a bare number, e.g. <code>300</code>). Players with no note-bids get rank-derived auto points and aren't checked against the {BUDGET} budget. LC shortlist spots charge {LC_CHARGE} each toward the total. Officer edits persist and survive re-imports.</div>
           <div style={{ overflowX: "auto", maxHeight: "calc(100vh - 300px)", overflowY: "auto" }}>
             <table><thead><tr><th>Player</th><th>Source</th><th>Items</th><th>Total</th><th>Status</th><th></th></tr></thead>
               <tbody>{Object.keys(data.budgets).sort((a, b) => a.localeCompare(b)).map(p => {
@@ -391,7 +390,7 @@ export default function App() {
                     <td><PN name={p} cls={data.players[p]?.cls} /></td>
                     <td>{b.mode === "notes" ? <span className="tag tag-u">NOTES</span> : <span className="tag" style={{ background: "#1a1a1a", color: "#666", border: "1px solid #2a2a2a" }}>AUTO</span>}{b.edited && <span className="tag tag-c" style={{ marginLeft: 4 }}>EDITED</span>}</td>
                     <td>{b.items.length}</td>
-                    <td style={{ fontWeight: 700, color: !checked ? "#888" : diff === 0 ? "#4ade80" : diff > 0 ? "#f87171" : "#fbbf24" }}>{b.total}</td>
+                    <td style={{ fontWeight: 700, color: !checked ? "#888" : diff === 0 ? "#4ade80" : diff > 0 ? "#f87171" : "#fbbf24" }}>{b.total}{b.lcCharge > 0 && <div className="sub" style={{ fontWeight: 400 }}>incl. {b.lcCharge} LC</div>}</td>
                     <td>{!checked ? <span className="dim" style={{ fontSize: 10 }}>—</span> : diff === 0 ? <span className="green" style={{ fontSize: 11 }}>✓ exactly {BUDGET}</span> : diff > 0 ? <span className="red" style={{ fontSize: 11 }}>✕ {diff} over</span> : <span className="gold" style={{ fontSize: 11 }}>⚠ {-diff} under</span>}</td>
                     <td style={{ whiteSpace: "nowrap" }}>
                       <button className="btn-detail" onClick={() => setBgExpand(bgExpand === p ? null : p)}>{bgExpand === p ? "Close" : "Adjust"}</button>{" "}
@@ -400,6 +399,11 @@ export default function App() {
                   </tr>
                   {bgExpand === p && (
                     <tr><td colSpan={6} style={{ background: "#141414", padding: "8px 14px" }}>
+                      {b.lcList.map((n, i) => (
+                        <div key={"lc" + i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "3px 0" }}>
+                          <span style={{ flex: 1, fontSize: 12 }} className="gold">{n} <span className="sub">LC shortlist charge</span></span>
+                          <span className="gold" style={{ fontWeight: 600, fontSize: 12, width: 52, textAlign: "center" }}>{LC_CHARGE}</span>
+                        </div>))}
                       {b.items.map(r => (
                         <div key={r.item} style={{ display: "flex", alignItems: "center", gap: 8, padding: "3px 0" }}>
                           <span style={{ flex: 1, fontSize: 12, color: r.not ? "#555" : "#e0e0e0" }}>{r.item}{r.not && <span className="sub" style={{ marginLeft: 6 }}>not counted ({r.not})</span>}</span>

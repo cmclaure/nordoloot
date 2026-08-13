@@ -18,7 +18,7 @@ Or skip the terminal entirely: run `npm run build` once and open `dist/index.htm
 - Bids are **blind** — nobody sees anyone else's numbers.
 - **Highest score wins.** Ties go to /roll.
 - Tier tokens count like any other item — bid on the **token name** (e.g. "Helm of the Forgotten Vanquisher"), not your class piece.
-- Loot Council items and crafting reagents are **outside the budget** — don't spend points on them.
+- Loot Council items and crafting reagents take no note bids — don't spend points on them. But being on an **LC shortlist isn't free**: each spot charges **100 points** of your budget (in line for both glaives = 200), so plan your bids around it.
 - Raiders who don't enter any bids get automatic points based on their wishlist order.
 - **Points are spent when you win.** Win an item and the points you bid on it are gone — they don't move to your other items.
 

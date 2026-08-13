@@ -1,4 +1,4 @@
-import { BUDGET, isTierName, REAGENTS, DEF_STATS, bossesFor, primaryBoss } from './constants.js'
+import { BUDGET, LC_CHARGE, isTierName, REAGENTS, DEF_STATS, bossesFor, primaryBoss } from './constants.js'
 
 // ── Score engine ──
 export function scoreParts(base, st, mod) {
@@ -18,9 +18,12 @@ export const pairKey = (p, i) => p + "\0" + i;
 // prose notes must never be misread as points.
 export const parseBidNote = n => { const m = String(n || "").trim().match(/^(\d{1,4})\s*(?:pts?|points?)?$/i); return m ? parseInt(m[1]) : null; };
 
-export function compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcNames) {
-  const lcSet = new Set(lcNames);
+export function compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems) {
+  const lcSet = new Set((lcItems || []).map(l => l.name));
   const excluded = it => lcSet.has(it) ? "lc" : REAGENTS.has(it) ? "reagent" : (excludeTier && isTierName(it)) ? "tier" : null;
+  // LC minus: every shortlist spot charges LC_CHARGE of the player's budget (listed twice = charged twice)
+  const lcCount = {}, lcListOf = {};
+  (lcItems || []).forEach(l => (l.shortlist || []).forEach(s => { const p = (s.player || "").trim(); if (!p) return; lcCount[p] = (lcCount[p] || 0) + 1; (lcListOf[p] = lcListOf[p] || []).push(l.name); }));
   const meta = {};              // player -> {cls}
   const alloc = {};             // player -> {item: points}
   const receivedTokens = new Set(); // player\0item obtained (TMB received)
@@ -55,19 +58,22 @@ export function compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, 
       const list = tmbWish[p].filter(x => !excluded(x.item));
       if (!list.length) return;
       const N = list.length; const wsum = list.reduce((a, _, i) => a + (N - i), 0) || 1;
+      const budgetFor = Math.max(0, BUDGET - (lcCount[p] || 0) * LC_CHARGE);
       list.sort((a, b) => a.sort - b.sort);
-      list.forEach((x, i) => { alloc[p][x.item] = Math.max(1, Math.round(BUDGET * (N - i) / wsum)); });
+      list.forEach((x, i) => { alloc[p][x.item] = Math.max(1, Math.round(budgetFor * (N - i) / wsum)); });
     }
     const ov = (ptsOverrides || {})[p];
     if (ov) Object.entries(ov).forEach(([it, v]) => { const n = +v || 0; if (n > 0) alloc[p][it] = n; else delete alloc[p][it]; });
   });
 
-  // per-player budget audit (pre-award totals; excluded categories don't count toward the budget)
+  // per-player budget audit (pre-award totals; excluded categories don't count toward the budget,
+  // but LC shortlist charges do)
   const budgets = {};
   Object.keys(alloc).forEach(p => {
     const rows = Object.entries(alloc[p]).map(([it, pts]) => ({ item: it, pts, not: excluded(it) })).sort((a, b) => b.pts - a.pts);
-    if (!rows.length) return;
-    budgets[p] = { total: rows.filter(r => !r.not).reduce((a, r) => a + r.pts, 0), mode: budgetMode[p] || "auto", edited: !!((ptsOverrides || {})[p] && Object.keys(ptsOverrides[p]).length), items: rows };
+    const charge = (lcCount[p] || 0) * LC_CHARGE;
+    if (!rows.length && !charge) return;
+    budgets[p] = { total: rows.filter(r => !r.not).reduce((a, r) => a + r.pts, 0) + charge, lcCharge: charge, lcList: lcListOf[p] || [], mode: budgetMode[p] || "auto", edited: !!((ptsOverrides || {})[p] && Object.keys(ptsOverrides[p]).length), items: rows };
   });
 
   const allPlayers = new Set([...Object.keys(meta), ...Object.keys(baseStats || {})]);
