@@ -19,7 +19,7 @@ export default function App() {
   const [excludeTier, setExcludeTier] = useState(s0.excludeTier !== undefined ? s0.excludeTier : false);
   const [lcItems, setLcItems] = useState(s0.lcItems || DEFAULT_LC());
 
-  const [view, setView] = useState("scores");
+  const [view, setView] = useState(s0.view || "scores");
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [boss, setBoss] = useState("all");
@@ -33,8 +33,8 @@ export default function App() {
   const [savedFlash, setSavedFlash] = useState(false);
 
   // raid night
-  const [raid, setRaid] = useState(null);
-  const [bossIdx, setBossIdx] = useState(0);
+  const [raid, setRaid] = useState(s0.raid || null);
+  const [bossIdx, setBossIdx] = useState(s0.bossIdx || 0);
   // LC edit
   const [lcNew, setLcNew] = useState("");
   const [lcAddP, setLcAddP] = useState(null);
@@ -53,9 +53,9 @@ export default function App() {
 
   // persist
   useEffect(() => {
-    const payload = { tmbRows, tmbName, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems };
+    const payload = { tmbRows, tmbName, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems, view, raid, bossIdx };
     try { localStorage.setItem(LS, JSON.stringify(payload)); setSavedFlash(true); const t = setTimeout(() => setSavedFlash(false), 900); return () => clearTimeout(t); } catch (e) { }
-  }, [tmbRows, tmbName, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems]);
+  }, [tmbRows, tmbName, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems, view, raid, bossIdx]);
 
   const importCSV = useCallback((file) => {
     if (!file) return;
@@ -69,13 +69,13 @@ export default function App() {
 
   // ── save file export/import ──
   const exportState = useCallback(() => {
-    const payload = { app: "nordoloot", version: 1, savedAt: new Date().toISOString(), tmbRows, tmbName, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems };
+    const payload = { app: "nordoloot", version: 1, savedAt: new Date().toISOString(), tmbRows, tmbName, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems, view, raid, bossIdx };
     const blob = new Blob([JSON.stringify(payload, null, 1)], { type: "application/json" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = `nordoloot-save-${new Date().toISOString().slice(0, 10)}.json`;
     a.click(); URL.revokeObjectURL(a.href);
-  }, [tmbRows, tmbName, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems]);
+  }, [tmbRows, tmbName, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems, view, raid, bossIdx]);
 
   const readSaveFile = useCallback((file) => {
     if (!file) return;
@@ -97,13 +97,13 @@ export default function App() {
     setAwardLog(o.awardLog || []); setDrops(o.drops || []);
     setMod(mergeMod(o.mod)); setExcludeTier(o.excludeTier !== undefined ? o.excludeTier : false);
     setLcItems(o.lcItems || DEFAULT_LC());
-    setPendingImport(null); setView("scores"); setRaid(null); setBossIdx(0); setBgExpand(null); setProfile(null); setDetail(null);
+    setPendingImport(null); setView(o.view || "scores"); setRaid(o.raid || null); setBossIdx(o.bossIdx || 0); setBgExpand(null); setProfile(null); setDetail(null);
   }, [pendingImport]);
 
   const setStat = useCallback((p, k, v) => setBaseStats(prev => {
     let n = v === "" ? 0 : (parseFloat(v) || 0);
     n = Math.max(0, n);
-    if (k === "tenure") n = Math.min(12, n);      // weeks — score caps at 12, so the input does too
+    if (k === "tenure") n = Math.min(4, n);       // weeks — score caps at 4, so the input does too
     if (k === "attendance") n = Math.min(100, n); // it's a %
     return { ...prev, [p]: { ...(prev[p] || DEF_STATS), [k]: n } };
   }), []);
@@ -121,7 +121,7 @@ export default function App() {
   const doDrop = useCallback((player, item) => { setDrops(prev => [...prev, { player, item, ts: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }]); setDropTarget(null); }, []);
   const restoreDrop = useCallback(i => setDrops(prev => prev.filter((_, j) => j !== i)), []);
 
-  const reset = useCallback(() => { localStorage.removeItem(LS); setTmb(null); setTmbName(""); setPtsOverrides({}); setBaseStats({}); setAwardLog([]); setDrops([]); setMod(MOD_DEF); setExcludeTier(false); setLcItems(DEFAULT_LC()); setConfirmReset(false); setView("scores"); setBgExpand(null); }, []);
+  const reset = useCallback(() => { localStorage.removeItem(LS); setTmb(null); setTmbName(""); setPtsOverrides({}); setBaseStats({}); setAwardLog([]); setDrops([]); setMod(MOD_DEF); setExcludeTier(false); setLcItems(DEFAULT_LC()); setConfirmReset(false); setView("scores"); setRaid(null); setBossIdx(0); setBgExpand(null); }, []);
 
   // filtered items
   const filtered = useMemo(() => {
@@ -435,11 +435,10 @@ export default function App() {
             <div className="sub" style={{ marginBottom: 6 }}>Live formula</div>
             <div className="formula-box">{"final = base\n"
               + (mod.att.on ? `  + (attendance% ÷ 100 × ${mod.att.w})\n` : "")
-              + (mod.ten.on ? `  + (min(tenure,12) ÷ 12 × ${mod.ten.w})\n` : "")
+              + (mod.ten.on ? `  + (min(tenure,4) ÷ 4 × ${mod.ten.w})\n` : "")
               + (mod.pass.on ? `  + (passes × ${mod.pass.w})\n` : "")
               + (mod.blp.on ? `  + (blp × ${mod.blp.w})\n` : "")
-              + (mod.ua.on ? `  − (${mod.ua.w} × strikes·(strikes+1)÷2)\n` : "")
-              + (mod.win.on ? `  − (wins × ${mod.win.w})` : "")}</div>
+              + (mod.ua.on ? `  − (${mod.ua.w} × strikes·(strikes+1)÷2)` : "")}</div>
             <div className="sub" style={{ marginTop: 10, lineHeight: 1.6 }}><b className="gold">Points are spent on win:</b> when a player wins an item, the base points they allocated to it are gone — they do not move to their remaining items. Budget allocations are one-shot bids.</div>
           </div>
         </div>)}
@@ -451,7 +450,7 @@ export default function App() {
           <div className="modal wide" onClick={e => e.stopPropagation()}>
             <h3>{detail.item} <span className="dim" style={{ fontSize: 11, fontWeight: 400 }}>{detail.bosses.join(" · ")}</span></h3>
             <div style={{ marginBottom: 10 }}><StatusTag s={detail.status} /> <span className="sub">{detail.count} contender{detail.count > 1 ? "s" : ""} · gap {detail.status === "ROLL" ? "tied" : "+" + detail.gap.toFixed(1)}</span></div>
-            <div style={{ overflowX: "auto" }}><table><thead><tr><th>Player</th><th>Base</th>{mod.att.on && <th>Att</th>}{mod.ten.on && <th>Ten</th>}{mod.pass.on && <th>Pass</th>}{mod.blp.on && <th>BLP</th>}{mod.ua.on && <th title="Unexcused absences">UA</th>}{mod.win.on && <th>Win</th>}<th>Final</th><th></th></tr></thead>
+            <div style={{ overflowX: "auto" }}><table><thead><tr><th>Player</th><th>Base</th>{mod.att.on && <th>Att</th>}{mod.ten.on && <th>Ten</th>}{mod.pass.on && <th>Pass</th>}{mod.blp.on && <th>BLP</th>}{mod.ua.on && <th title="Unexcused absences">UA</th>}<th>Final</th><th></th></tr></thead>
               <tbody>{detail.contenders.map((c, i) => (
                 <tr key={c.player} style={{ background: i === 0 ? "#141f14" : detail.tied.includes(c.player) ? "#241414" : "transparent" }}>
                   <td><PN name={c.player} cls={c.cls} />{i === 0 && detail.status !== "ROLL" && <span className="tag tag-c" style={{ marginLeft: 6 }}>WIN</span>}{detail.status === "ROLL" && detail.tied.includes(c.player) && <span className="tag tag-r" style={{ marginLeft: 6 }}>ROLL</span>}</td>
@@ -461,7 +460,6 @@ export default function App() {
                   {mod.pass.on && <td className="green">+{c.parts.pass.toFixed(1)}</td>}
                   {mod.blp.on && <td className="green">+{c.parts.blp.toFixed(1)}</td>}
                   {mod.ua.on && <td className="red">{c.parts.ua ? c.parts.ua.toFixed(1) : <span className="dim">—</span>}</td>}
-                  {mod.win.on && <td className="red">{c.parts.win.toFixed(1)}</td>}
                   <td className="gold" style={{ fontWeight: 700 }}>{c.final.toFixed(1)}</td>
                   <td><button className="btn-award" onClick={() => doAward(detail, c.player)}>Award</button></td>
                 </tr>))}</tbody></table></div>

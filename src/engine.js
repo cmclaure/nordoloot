@@ -4,14 +4,13 @@ import { BUDGET, isTierName, REAGENTS, DEF_STATS, bossesFor, primaryBoss } from 
 export function scoreParts(base, st, mod) {
   const p = { base: base };
   p.att = mod.att.on ? (st.attendance / 100) * mod.att.w : 0;
-  p.ten = mod.ten.on ? (Math.min(st.tenure, 12) / 12) * mod.ten.w : 0;
+  p.ten = mod.ten.on ? (Math.min(st.tenure, 4) / 4) * mod.ten.w : 0;
   p.pass = mod.pass.on ? st.pass * mod.pass.w : 0;
   p.blp = mod.blp.on ? st.blp * mod.blp.w : 0;
-  p.win = mod.win.on ? -(st.wins * mod.win.w) : 0;
   // triangular escalation: n strikes cost w·n(n+1)/2. mod.ua guarded — saved pre-ua modifier state may lack it
   const ua = mod.ua && mod.ua.on ? (st.ua || 0) : 0;
   p.ua = ua > 0 ? -(mod.ua.w * ua * (ua + 1) / 2) : 0;
-  p.final = p.base + p.att + p.ten + p.pass + p.blp + p.win + p.ua;
+  p.final = p.base + p.att + p.ten + p.pass + p.blp + p.ua;
   return p;
 }
 export const pairKey = (p, i) => p + "\0" + i;
