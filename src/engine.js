@@ -1,4 +1,4 @@
-import { BUDGET, LC_CHARGE, isTierName, REAGENTS, DEF_STATS, bossesFor, primaryBoss } from './constants.js'
+import { BUDGET, LC_CHARGE, DUP_OK, isTierName, REAGENTS, DEF_STATS, bossesFor, primaryBoss } from './constants.js'
 
 // ── Score engine ──
 export function scoreParts(base, st, mod) {
@@ -25,34 +25,42 @@ export function compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, 
   const lcCount = {}, lcListOf = {};
   (lcItems || []).forEach(l => (l.shortlist || []).forEach(s => { const p = (s.player || "").trim(); if (!p) return; lcCount[p] = (lcCount[p] || 0) + 1; (lcListOf[p] = lcListOf[p] || []).push(l.name); }));
   const meta = {};              // player -> {cls}
-  const alloc = {};             // player -> {item: points}
+  const alloc = {};             // player -> {item: active bid}
+  const dupQ = {};              // pair -> [further bids] for DUP_OK items listed more than once
   const receivedTokens = new Set(); // player\0item obtained (TMB received)
   const crossed = new Set();    // player\0item wishlist rows crossed off
+  const dupRecvN = {}, dupCrossN = {}; // per-pair receipt counts for DUP_OK items
   const ensure = (p, cls) => { if (!meta[p]) meta[p] = { cls: cls || "" }; if (cls && !meta[p].cls) meta[p].cls = cls; if (!alloc[p]) alloc[p] = {}; };
 
   (tmbRows || []).forEach(r => {
     const p = (r.character_name || "").trim(); if (!p) return;
     ensure(p, r.character_class);
     const it = (r.item_name || "").trim(); if (!it) return;
-    if (r.type === "received") { receivedTokens.add(pairKey(p, it)); return; }
-    if (r.type === "wishlist" && (r.received_at || "").trim()) crossed.add(pairKey(p, it));
+    const pk = pairKey(p, it);
+    if (r.type === "received") { if (DUP_OK.has(it)) dupRecvN[pk] = (dupRecvN[pk] || 0) + 1; else receivedTokens.add(pk); return; }
+    if (r.type === "wishlist" && (r.received_at || "").trim()) { if (DUP_OK.has(it)) dupCrossN[pk] = (dupCrossN[pk] || 0) + 1; else crossed.add(pk); }
   });
 
   // Base points come from wishlist-item notes; players with no note-bids fall back to
   // sort_order-derived auto-allocation. Officer overrides layer on top of either.
-  const tmbWish = {};  // player -> [{item,sort,bid}]
+  const tmbWish = {};  // player -> [{item,sort,bid}]  (crossed-off rows skipped per-row)
   (tmbRows || []).forEach(r => {
     if (r.type !== "wishlist") return;
     const p = (r.character_name || "").trim(); const it = (r.item_name || "").trim();
-    if (!p || !it) return; if (crossed.has(pairKey(p, it))) return;
+    if (!p || !it) return; if ((r.received_at || "").trim()) return;
     (tmbWish[p] = tmbWish[p] || []).push({ item: it, sort: parseInt(r.sort_order) || 0, bid: parseBidNote(r.note) });
   });
+  const addClaim = (p, it, v) => {
+    if (DUP_OK.has(it) && alloc[p][it] !== undefined) (dupQ[pairKey(p, it)] = dupQ[pairKey(p, it)] || []).push(v);
+    else if (DUP_OK.has(it)) alloc[p][it] = v;
+    else alloc[p][it] = (alloc[p][it] || 0) + v;
+  };
   const budgetMode = {};
   Object.keys(tmbWish).forEach(p => {
     const noted = tmbWish[p].filter(x => x.bid !== null && x.bid > 0);
     if (noted.length) {
       budgetMode[p] = "notes";
-      noted.forEach(x => { alloc[p][x.item] = (alloc[p][x.item] || 0) + x.bid; });
+      noted.forEach(x => addClaim(p, x.item, x.bid));
     } else {
       budgetMode[p] = "auto";
       const list = tmbWish[p].filter(x => !excluded(x.item));
@@ -60,17 +68,36 @@ export function compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, 
       const N = list.length; const wsum = list.reduce((a, _, i) => a + (N - i), 0) || 1;
       const budgetFor = Math.max(0, BUDGET - (lcCount[p] || 0) * LC_CHARGE);
       list.sort((a, b) => a.sort - b.sort);
-      list.forEach((x, i) => { alloc[p][x.item] = Math.max(1, Math.round(budgetFor * (N - i) / wsum)); });
+      list.forEach((x, i) => addClaim(p, x.item, Math.max(1, Math.round(budgetFor * (N - i) / wsum))));
     }
     const ov = (ptsOverrides || {})[p];
-    if (ov) Object.entries(ov).forEach(([it, v]) => { const n = +v || 0; if (n > 0) alloc[p][it] = n; else delete alloc[p][it]; });
+    if (ov) Object.entries(ov).forEach(([it, v]) => { const n = +v || 0; if (n > 0) alloc[p][it] = n; else { delete alloc[p][it]; delete dupQ[pairKey(p, it)]; } });
+  });
+  // biggest bid is the active claim; the rest queue behind it
+  Object.keys(dupQ).forEach(pk => {
+    const [p, it] = pk.split("\0");
+    if (!alloc[p] || alloc[p][it] === undefined) { delete dupQ[pk]; return; }
+    const chain = [alloc[p][it], ...dupQ[pk]].sort((a, b) => b - a);
+    alloc[p][it] = chain[0]; dupQ[pk] = chain.slice(1);
+  });
+  // copies already obtained (TMB received rows beyond crossed-off wishlist rows) consume claims, top first
+  Object.keys(dupRecvN).forEach(pk => {
+    const extra = Math.max(0, (dupRecvN[pk] || 0) - (dupCrossN[pk] || 0));
+    const [p, it] = pk.split("\0");
+    for (let i = 0; i < extra; i++) {
+      if (!alloc[p] || alloc[p][it] === undefined) break;
+      const q = dupQ[pk];
+      if (q && q.length) alloc[p][it] = q.shift(); else delete alloc[p][it];
+    }
   });
 
   // per-player budget audit (pre-award totals; excluded categories don't count toward the budget,
   // but LC shortlist charges do)
   const budgets = {};
   Object.keys(alloc).forEach(p => {
-    const rows = Object.entries(alloc[p]).map(([it, pts]) => ({ item: it, pts, not: excluded(it) })).sort((a, b) => b.pts - a.pts);
+    const rows = Object.entries(alloc[p]).map(([it, pts]) => ({ item: it, pts, not: excluded(it) }));
+    Object.entries(dupQ).forEach(([pk, q]) => { if (!pk.startsWith(p + "\0")) return; const it = pk.slice(p.length + 1); q.forEach((pts, i) => rows.push({ item: it, pts, not: excluded(it), copy: i + 2 })); });
+    rows.sort((a, b) => b.pts - a.pts);
     const charge = (lcCount[p] || 0) * LC_CHARGE;
     if (!rows.length && !charge) return;
     budgets[p] = { total: rows.filter(r => !r.not).reduce((a, r) => a + r.pts, 0) + charge, lcCharge: charge, lcList: lcListOf[p] || [], mode: budgetMode[p] || "auto", edited: !!((ptsOverrides || {})[p] && Object.keys(ptsOverrides[p]).length), items: rows };
@@ -91,11 +118,18 @@ export function compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, 
     const cont = contendersNow(item);
     if (mod.blp.on) { cont.forEach(c => { if (c !== winner) db[c] = (db[c] || 0) + 1; }); }
     dw[winner] = (dw[winner] || 0) + 1;
-    awardedPairs.add(pairKey(winner, item)); recv.add(pairKey(winner, item));
     // points spent on a won item are gone — no reallocation to remaining items
-    const p = work[winner] ? work[winner][item] || 0 : 0;
-    if (work[winner]) delete work[winner][item];
-    logView.push({ ...a, spent: p });
+    const spent = work[winner] ? work[winner][item] || 0 : 0;
+    const pk = pairKey(winner, item);
+    const q = dupQ[pk];
+    if (q && q.length) {
+      // second copy of a non-unique ring: the next bid takes over, player stays in line
+      if (work[winner]) work[winner][item] = q.shift();
+    } else {
+      awardedPairs.add(pk); recv.add(pk);
+      if (work[winner]) delete work[winner][item];
+    }
+    logView.push({ ...a, spent });
   });
 
   // ── final per-item results ──
@@ -129,10 +163,12 @@ export function compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, 
   items.sort((a, b) => ({ UNCONTESTED: 2, CLEAR: 1, ROLL: 0 }[a.status] - { UNCONTESTED: 2, CLEAR: 1, ROLL: 0 }[b.status]) || b.count - a.count || a.item.localeCompare(b.item));
 
   // ── player profiles ──
+  const recvDisplay = new Set(recv);
+  Object.keys(dupRecvN).forEach(pk => { if (dupRecvN[pk] > 0) recvDisplay.add(pk); });
   const players = {};
   allPlayers.forEach(p => {
     const st = statOf(p, dw, db);
-    const received = [...recv].filter(k => k.startsWith(p + "\0")).map(k => k.slice(p.length + 1));
+    const received = [...recvDisplay].filter(k => k.startsWith(p + "\0")).map(k => k.slice(p.length + 1));
     const wl = [];
     Object.keys(work[p] || {}).forEach(it => { if (!(work[p][it] > 0)) return; if (excluded(it)) return; if (recv.has(pairKey(p, it))) return; if (dropSet.has(pairKey(p, it))) return; const res = items.find(x => x.item === it); const parts = scoreParts(work[p][it], st, mod); wl.push({ item: it, base: work[p][it], parts, final: parts.final, isWinner: res && res.winner === p, winner: res ? res.winner : null, status: res ? res.status : null }); });
     wl.sort((a, b) => b.base - a.base);

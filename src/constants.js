@@ -25,8 +25,13 @@ export const BL = {
   "Anetheron": ["Anetheron's Noose", "Hatefury Mantle", "Archbishop's Slippers", "Pillar of Ferocity", "Bastion of Light", "Glimmering Steel Mantle", "The Unbreakable Will", "Blade of Infamy", "Quickstrider Moccasins", "Golden Links of Restoration", "Don Alejandro's Money Belt", "Enchanted Leather Sandals"],
   "Kaz'rogal": ["Kaz'rogal's Hardened Heart", "Black Featherlight Boots", "Beast-tamer's Shoulders", "Sun-touched Chain Leggings", "Blue Suede Shoes", "Angelista's Sash", "Belt of the Crescent Moon", "Belt of Seething Fury", "Leggings of Channeled Elements", "Razorfury Mantle", "Hammer of Atonement", "Loop of Forged Natures", "Valestalker Girdle"],
   "Azgalor": ["Helm of the Forgotten Conqueror", "Helm of the Forgotten Protector", "Helm of the Forgotten Vanquisher", "Don Rodrigo's Poncho", "Shady Dealer's Pantaloons", "Bow of the Inferno", "Girdle of Hope", "Savage-Hewn Battleaxe", "Terrorweave Tunic", "Midnight Chestguard"],
-  "Archimonde": ["Tempest of Chaos", "Cataclysm's Edge", "Apostle of Argus", "Antonidas's Aegis of Rapt Concentration", "Robes of Rhonin", "Midnight Helm", "Bristleblitz Striker", "Mail of Fevered Pursuit", "Leggings of Eternity", "Helm of the Forgotten Conqueror", "Helm of the Forgotten Protector", "Helm of the Forgotten Vanquisher"]
+  "Archimonde": ["Tempest of Chaos", "Cataclysm's Edge", "Apostle of Argus", "Antonidas's Aegis of Rapt Concentration", "Robes of Rhonin", "Midnight Helm", "Bristleblitz Striker", "Mail of Fevered Pursuit", "Leggings of Eternity", "Helm of the Forgotten Conqueror", "Helm of the Forgotten Protector", "Helm of the Forgotten Vanquisher"],
+  // BoP craftables from Heart of Darkness patterns — biddable like drops, but never appear on a boss
+  "Crafted (BoP)": ["Swiftsteel Shoulders", "Dawnsteel Shoulders", "Swiftsteel Bracers", "Dawnsteel Bracers", "Swiftstrike Shoulders", "Swiftstrike Bracers", "Living Earth Shoulders", "Living Earth Bindings", "Swiftheal Mantle", "Swiftheal Wraps", "Mantle of Nimble Thought", "Bracers of Nimble Thought"]
 };
+export const CRAFTED = "Crafted (BoP)";
+// non-unique rings players may want two of — each TMB listing is a separate claim
+export const DUP_OK = new Set(["Band of Devastation", "Blessed Band of Karabor", "Ring of Ancient Knowledge"]);
 export const BOSS_RAID = {}; Object.entries(RAID_BOSSES).forEach(([r, bs]) => bs.forEach(b => BOSS_RAID[b] = r));
 export const ITEM_BOSSES = {}; Object.entries(BL).forEach(([b, items]) => items.forEach(it => { (ITEM_BOSSES[it] = ITEM_BOSSES[it] || []).push(b) }));
 export const bossesFor = it => ITEM_BOSSES[it] || [];

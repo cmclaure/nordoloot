@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import Papa from 'papaparse'
-import { CC, BT, MH, RAID_BOSSES, BUDGET, LC_CHARGE, MOD_DEF, DEF_STATS, DEFAULT_LC } from './constants.js'
+import { CC, BT, MH, RAID_BOSSES, CRAFTED, BUDGET, LC_CHARGE, MOD_DEF, DEF_STATS, DEFAULT_LC } from './constants.js'
 import { compute, LS, loadLS } from './engine.js'
 
 // merge a saved modifier object over MOD_DEF so keys added later pick up defaults
@@ -132,7 +132,7 @@ export default function App() {
     return it;
   }, [data, filter, search, boss]);
 
-  const activeBosses = useMemo(() => { if (!data) return {}; const set = new Set(data.items.flatMap(i => i.bosses)); const out = {}; Object.entries(RAID_BOSSES).forEach(([r, bs]) => { const f = bs.filter(b => set.has(b)); if (f.length) out[r] = f; }); return out; }, [data]);
+  const activeBosses = useMemo(() => { if (!data) return {}; const set = new Set(data.items.flatMap(i => i.bosses)); const out = {}; Object.entries(RAID_BOSSES).forEach(([r, bs]) => { const f = bs.filter(b => set.has(b)); if (f.length) out[r] = f; }); if (set.has(CRAFTED)) out[CRAFTED] = [CRAFTED]; return out; }, [data]);
 
   // players whose submitted (note-based or officer-edited) budget isn't exactly 500 — auto players aren't flagged
   const offBudget = useMemo(() => { if (!data) return []; return Object.entries(data.budgets).filter(([, b]) => (b.mode === "notes" || b.edited) && b.total !== BUDGET).map(([p, b]) => ({ player: p, ...b })); }, [data]);
@@ -404,10 +404,11 @@ export default function App() {
                           <span style={{ flex: 1, fontSize: 12 }} className="gold">{n} <span className="sub">LC shortlist charge</span></span>
                           <span className="gold" style={{ fontWeight: 600, fontSize: 12, width: 52, textAlign: "center" }}>{LC_CHARGE}</span>
                         </div>))}
-                      {b.items.map(r => (
-                        <div key={r.item} style={{ display: "flex", alignItems: "center", gap: 8, padding: "3px 0" }}>
-                          <span style={{ flex: 1, fontSize: 12, color: r.not ? "#555" : "#e0e0e0" }}>{r.item}{r.not && <span className="sub" style={{ marginLeft: 6 }}>not counted ({r.not})</span>}</span>
-                          <input className="stat-input" type="number" min="0" value={r.pts} onChange={e => setOverride(p, r.item, e.target.value)} />
+                      {b.items.map((r, ri) => (
+                        <div key={r.item + (r.copy || "")} style={{ display: "flex", alignItems: "center", gap: 8, padding: "3px 0" }}>
+                          <span style={{ flex: 1, fontSize: 12, color: r.not ? "#555" : "#e0e0e0" }}>{r.item}{r.copy && <span className="sub" style={{ marginLeft: 6 }}>{r.copy === 2 ? "2nd" : r.copy + "th"} copy</span>}{r.not && <span className="sub" style={{ marginLeft: 6 }}>not counted ({r.not})</span>}</span>
+                          {r.copy ? <span style={{ fontWeight: 600, fontSize: 12, width: 52, textAlign: "center", color: "#e0e0e0" }}>{r.pts}</span>
+                            : <input className="stat-input" type="number" min="0" value={r.pts} onChange={e => setOverride(p, r.item, e.target.value)} />}
                         </div>))}
                       <div className="sub" style={{ marginTop: 6 }}>Adjust after talking to the raider — no re-import needed. 0 removes the claim. Re-importing the TMB file keeps these edits.</div>
                     </td></tr>)}
