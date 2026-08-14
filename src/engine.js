@@ -21,9 +21,10 @@ export const parseBidNote = n => { const m = String(n || "").trim().match(/^(\d{
 export function compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems) {
   const lcSet = new Set((lcItems || []).map(l => l.name));
   const excluded = it => lcSet.has(it) ? "lc" : REAGENTS.has(it) ? "reagent" : (excludeTier && isTierName(it)) ? "tier" : null;
-  // LC minus: every shortlist spot charges LC_CHARGE of the player's budget (listed twice = charged twice)
+  // LC minus: receiving an LC item charges LC_CHARGE of the player's budget — waiting in line is free.
+  // Charged per RECEIVED shortlist entry (each glaive counts separately).
   const lcCount = {}, lcListOf = {};
-  (lcItems || []).forEach(l => (l.shortlist || []).forEach(s => { const p = (s.player || "").trim(); if (!p) return; lcCount[p] = (lcCount[p] || 0) + 1; (lcListOf[p] = lcListOf[p] || []).push(l.name); }));
+  (lcItems || []).forEach(l => (l.shortlist || []).forEach(s => { if (s.status !== "RECEIVED") return; const p = (s.player || "").trim(); if (!p) return; lcCount[p] = (lcCount[p] || 0) + 1; (lcListOf[p] = lcListOf[p] || []).push(l.name); }));
   const meta = {};              // player -> {cls}
   const alloc = {};             // player -> {item: active bid}
   const dupQ = {};              // pair -> [further bids] for DUP_OK items listed more than once
