@@ -117,7 +117,9 @@ export function compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, 
   (awardLog || []).forEach(a => {
     const item = a.item, winner = a.player;
     const cont = contendersNow(item);
-    if (mod.blp.on) { cont.forEach(c => { if (c !== winner) db[c] = (db[c] || 0) + 1; }); }
+    // BLP counts only lost /roll-offs — losing to a higher bid is the bid working, not bad luck.
+    // (a.tied is recorded at award time; legacy roll entries without it fall back to all contenders)
+    if (mod.blp.on && a.wasRoll) { (a.tied || cont).forEach(c => { if (c !== winner) db[c] = (db[c] || 0) + 1; }); }
     dw[winner] = (dw[winner] || 0) + 1;
     // points spent on a won item are gone — no reallocation to remaining items
     const spent = work[winner] ? work[winner][item] || 0 : 0;

@@ -113,7 +113,7 @@ export default function App() {
     const winner = item.status === "ROLL" ? pick : item.winner;
     if (!winner) return;
     const cls = item.contenders.find(c => c.player === winner)?.cls || "";
-    setAwardLog(prev => [...prev, { item: item.item, player: winner, cls, ts: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }), wasRoll: item.status === "ROLL" }]);
+    setAwardLog(prev => [...prev, { item: item.item, player: winner, cls, ts: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }), wasRoll: item.status === "ROLL", tied: item.status === "ROLL" ? item.tied : undefined }]);
     setAward(null); setDetail(null);
   }, []);
   const undoAward = useCallback(i => setAwardLog(prev => prev.filter((_, j) => j !== i)), []);
