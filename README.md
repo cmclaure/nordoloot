@@ -21,7 +21,7 @@ Or skip the terminal entirely: run `npm run build` once and open `dist/index.htm
 - BoP craftables (Swiftsteel, Dawnsteel, Swiftstrike, Living Earth, Swiftheal, Nimble Thought pieces) are biddable and show under a "Crafted (BoP)" source.
 - The three BT trash rings (Band of Devastation, Blessed Band of Karabor, Ring of Ancient Knowledge) can be **listed twice** — each listing is its own bid and claim; winning one copy keeps the second bid in line.
 - Loot Council items and crafting reagents take no note bids — don't spend points on them. Waiting on an LC shortlist is free, but **receiving an LC item charges 100 points** of your budget from that moment on (each glaive counts separately) — the officers trim the raider's remaining bids to fit.
-- Raiders who don't enter any bids get automatic points based on their wishlist order.
+- Items left without a bid split the raider's leftover points automatically (higher on the list = more). Raiders who enter no bids at all get automatic points across their whole list. Spend all 500 in notes and blank items get nothing.
 - **Points are spent when you win.** Win an item and the points you bid on it are gone — they don't move to your other items.
 
 ## Officer workflow

@@ -217,7 +217,7 @@ export default function App() {
         <div style={{ textAlign: "center", padding: "70px 0", color: "#444" }}>
           <div style={{ fontSize: 40, marginBottom: 10 }}>⚔️</div>
           <div style={{ fontSize: 14, color: "#666" }}>Import a TMB export to begin.</div>
-          <div className="sub" style={{ marginTop: 8 }}>Raiders put their point bid (just the number, e.g. <code>100</code>) in each wishlist item's note on ThatsmyBIS. Players with no note-bids get rank-derived auto points. Everything saves to your browser automatically.</div>
+          <div className="sub" style={{ marginTop: 8 }}>Raiders put their point bid (just the number, e.g. <code>100</code>) in each wishlist item's note on ThatsmyBIS. Un-noted items are auto-filled from leftover points; fully note-less players get auto points on everything. Everything saves to your browser automatically.</div>
         </div>
       ) : (<>
         {/* session logs */}
@@ -378,7 +378,7 @@ export default function App() {
 
         {/* ══ BUDGETS ══ */}
         {view === "budget" && (<div>
-          <div className="sub" style={{ marginBottom: 8 }}>Point bids come from each wishlist item's note in the TMB export (a bare number, e.g. <code>100</code>). Players with no note-bids get rank-derived auto points and aren't checked against the {BUDGET} budget. A RECEIVED LC item charges {LC_CHARGE} toward the total. Officer edits persist and survive re-imports.</div>
+          <div className="sub" style={{ marginBottom: 8 }}>Point bids come from each wishlist item's note in the TMB export (a bare number, e.g. <code>100</code>). Players with no note-bids get rank-derived auto points and aren't checked against the {BUDGET} budget; partial noters have their un-noted items auto-filled from the leftover (marked below). A RECEIVED LC item charges {LC_CHARGE} toward the total. Officer edits persist and survive re-imports.</div>
           <div style={{ overflowX: "auto", maxHeight: "calc(100vh - 300px)", overflowY: "auto" }}>
             <table><thead><tr><th>Player</th><th>Source</th><th>Items</th><th>Total</th><th>Status</th><th></th></tr></thead>
               <tbody>{Object.keys(data.budgets).sort((a, b) => a.localeCompare(b)).map(p => {
@@ -406,7 +406,7 @@ export default function App() {
                         </div>))}
                       {b.items.map((r, ri) => (
                         <div key={r.item + (r.copy || "")} style={{ display: "flex", alignItems: "center", gap: 8, padding: "3px 0" }}>
-                          <span style={{ flex: 1, fontSize: 12, color: r.not ? "#555" : "#e0e0e0" }}>{r.item}{r.copy && <span className="sub" style={{ marginLeft: 6 }}>{r.copy === 2 ? "2nd" : r.copy + "th"} copy</span>}{r.not && <span className="sub" style={{ marginLeft: 6 }}>not counted ({r.not})</span>}</span>
+                          <span style={{ flex: 1, fontSize: 12, color: r.not ? "#555" : "#e0e0e0" }}>{r.item}{r.copy && <span className="sub" style={{ marginLeft: 6 }}>{r.copy === 2 ? "2nd" : r.copy + "th"} copy</span>}{r.af && <span className="sub" style={{ marginLeft: 6, color: "#3FC7EB" }}>auto-filled</span>}{r.not && <span className="sub" style={{ marginLeft: 6 }}>not counted ({r.not})</span>}</span>
                           {r.copy ? <span style={{ fontWeight: 600, fontSize: 12, width: 52, textAlign: "center", color: "#e0e0e0" }}>{r.pts}</span>
                             : <input className="stat-input" type="number" min="0" value={r.pts} onChange={e => setOverride(p, r.item, e.target.value)} />}
                         </div>))}

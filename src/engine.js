@@ -56,12 +56,24 @@ export function compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, 
     else if (DUP_OK.has(it)) alloc[p][it] = v;
     else alloc[p][it] = (alloc[p][it] || 0) + v;
   };
-  const budgetMode = {};
+  const budgetMode = {}; const autoFill = {};  // p -> Set(items) filled from leftover
   Object.keys(tmbWish).forEach(p => {
     const noted = tmbWish[p].filter(x => x.bid !== null && x.bid > 0);
     if (noted.length) {
       budgetMode[p] = "notes";
       noted.forEach(x => addClaim(p, x.item, x.bid));
+      // un-noted items absorb the leftover budget with the same rank weighting, summed exactly
+      // so a partial noter still lands on 500; no leftover (bids >= budget) means blanks get nothing
+      const blanks = tmbWish[p].filter(x => (x.bid === null || x.bid <= 0) && !excluded(x.item));
+      const notedSum = noted.reduce((a, x) => a + (excluded(x.item) ? 0 : x.bid), 0);
+      const remaining = Math.max(0, BUDGET - (lcCount[p] || 0) * LC_CHARGE - notedSum);
+      if (blanks.length && remaining > 0) {
+        blanks.sort((a, b) => a.sort - b.sort);
+        const N = blanks.length; const wsum = blanks.reduce((a, _, i) => a + (N - i), 0) || 1;
+        const pts = blanks.map((_, i) => Math.floor(remaining * (N - i) / wsum));
+        pts[0] += remaining - pts.reduce((a, b) => a + b, 0);
+        blanks.forEach((x, i) => { if (pts[i] > 0) { addClaim(p, x.item, pts[i]); (autoFill[p] = autoFill[p] || new Set()).add(x.item); } });
+      }
     } else {
       budgetMode[p] = "auto";
       const list = tmbWish[p].filter(x => !excluded(x.item));
@@ -96,7 +108,7 @@ export function compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, 
   // but LC shortlist charges do)
   const budgets = {};
   Object.keys(alloc).forEach(p => {
-    const rows = Object.entries(alloc[p]).map(([it, pts]) => ({ item: it, pts, not: excluded(it) }));
+    const rows = Object.entries(alloc[p]).map(([it, pts]) => ({ item: it, pts, not: excluded(it), af: autoFill[p] && autoFill[p].has(it) }));
     Object.entries(dupQ).forEach(([pk, q]) => { if (!pk.startsWith(p + "\0")) return; const it = pk.slice(p.length + 1); q.forEach((pts, i) => rows.push({ item: it, pts, not: excluded(it), copy: i + 2 })); });
     rows.sort((a, b) => b.pts - a.pts);
     const charge = (lcCount[p] || 0) * LC_CHARGE;
