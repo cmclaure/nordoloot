@@ -32,6 +32,7 @@ Or skip the terminal entirely: run `npm run build` once and open `dist/index.htm
 4. Message the raider, then fix their numbers right in the app with the **Adjust** button. No re-export needed — your edits are kept even when you import a fresh CSV later.
 5. Keep attendance, tenure, and absence strikes up to date on the **Players** tab.
 6. **Export** (top right) saves everything to a single file — use it as a backup before raid, or send it to another officer, who can **Import** it and see exactly what you see.
+7. **Standings page** (raider-facing): regenerate with `node tools/standings.mjs <nordoloot-save.json> out.html`, feeding it the Export save file so stats, awards, LC lines, and officer edits are included (a raw TMB CSV works but uses defaults), then republish the artifact at the same URL.
 
 ## Raid night
 
@@ -54,5 +55,3 @@ Note on absences: marking out ahead of time avoids a strike, but it does not pro
 ## Practice data
 
 `fake-tmb-export-p3-notes.csv` is a fake 28-player roster with bids already filled in — import it to click around safely before using real data.
-
-- **Standings page** (raider-facing artifact): regenerate with `node tools/standings.mjs <nordoloot-save.json> out.html` — feed it the Export save file so stats, awards, LC lines, and officer edits are included (a raw TMB CSV works but uses defaults) — then republish the artifact at the same URL.
