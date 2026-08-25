@@ -36,8 +36,8 @@ data.items.forEach(i => { const b = primaryBoss(i.item) || "Other"; if (!groups.
 const orderedGroups = [...bossOrder.filter(b => groups.has(b)), ...[...groups.keys()].filter(b => !bossOrder.includes(b))];
 
 const itemLine = i => {
-  const others = i.contenders.slice(1);
-  const vs = others.length ? `<span class="vs">vs ${others.map(c => `${esc(c.player)} ${c.final.toFixed(0)}`).join(" · ")}</span>` : `<span class="vs solo">uncontested</span>`;
+  const others = i.status === "ROLL" ? i.contenders.filter(c => !i.tied.includes(c.player)) : i.contenders.slice(1);
+  const vs = others.length ? `<span class="vs">vs ${others.map(c => `${esc(c.player)} ${c.final.toFixed(0)}`).join(" · ")}</span>` : i.contenders.length > 1 ? "" : `<span class="vs solo">uncontested</span>`;
   const head = i.status === "ROLL"
     ? `<span class="win roll">/roll between ${i.tied.map(esc).join(", ")}</span> <span class="pts">${i.contenders[0].final.toFixed(0)}</span>`
     : `<span class="win">${esc(i.winner)}</span> <span class="pts">${i.contenders[0].final.toFixed(0)}</span>`;
