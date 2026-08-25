@@ -1,4 +1,4 @@
-import { BUDGET, LC_CHARGE, DUP_OK, isTierName, REAGENTS, DEF_STATS, bossesFor, primaryBoss, tierTokenFor } from './constants.js'
+import { BUDGET, LC_CHARGE, LC_UPFRONT, DUP_OK, isTierName, REAGENTS, DEF_STATS, bossesFor, primaryBoss, tierTokenFor } from './constants.js'
 
 // ── Score engine ──
 export function scoreParts(base, st, mod) {
@@ -21,10 +21,21 @@ export const parseBidNote = n => { const m = String(n || "").trim().match(/^(\d{
 export function compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems) {
   const lcSet = new Set((lcItems || []).map(l => l.name));
   const excluded = it => lcSet.has(it) ? "lc" : REAGENTS.has(it) ? "reagent" : (excludeTier && isTierName(it)) ? "tier" : null;
-  // LC minus: receiving an LC item charges LC_CHARGE of the player's budget — waiting in line is free.
-  // Charged per RECEIVED shortlist entry (each glaive counts separately).
+  // LC minus: the first LC_UPFRONT waiting spots on each shortlist pay LC_CHARGE upfront — being
+  // near the front of the line for a chase item costs points now, not just on receipt. Receiving
+  // keeps the same charge (it's the deposit converting, not a second fee); spots further back are
+  // free until the line moves; leaving the line refunds. Each glaive counts separately.
   const lcCount = {}, lcListOf = {};
-  (lcItems || []).forEach(l => (l.shortlist || []).forEach(s => { if (s.status !== "RECEIVED") return; const p = (s.player || "").trim(); if (!p) return; lcCount[p] = (lcCount[p] || 0) + 1; (lcListOf[p] = lcListOf[p] || []).push(l.name); }));
+  (lcItems || []).forEach(l => {
+    let waiting = 0;
+    (l.shortlist || []).forEach(s => {
+      const p = (s.player || "").trim(); if (!p) return;
+      const recv = s.status === "RECEIVED";
+      if (!recv && waiting++ >= LC_UPFRONT) return;
+      lcCount[p] = (lcCount[p] || 0) + 1;
+      (lcListOf[p] = lcListOf[p] || []).push({ name: l.name, recv });
+    });
+  });
   const meta = {};              // player -> {cls}
   const alloc = {};             // player -> {item: active bid}
   const dupQ = {};              // pair -> [further bids] for DUP_OK items listed more than once
