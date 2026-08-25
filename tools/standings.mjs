@@ -94,13 +94,12 @@ const html = `<title>Nordolo Standings</title>
   <header>
     <div class="eyebrow">Nordolo · Black Temple &amp; Mount Hyjal</div>
     <h1>Loot standings</h1>
-    <div class="sub">Projected winners from everyone's locked lists — score = your points + attendance, tenure, and bad-luck modifiers. Updated ${esc(stamp)}.</div>
+    <div class="sub">Updated ${esc(stamp)}</div>
   </header>
   ${awardsHtml}
   ${lcHtml}
   <h2>Projected winners by boss</h2>
   ${orderedGroups.map(b => `<h3>${esc(b)}</h3>\n${groups.get(b).map(itemLine).join("\n")}`).join("\n")}
-  <footer>Nordolo · how scoring works is on the loot-rules page · questions to the officer team.</footer>
 </div>
 `;
 writeFileSync(outPath, html);
