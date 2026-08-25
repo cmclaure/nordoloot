@@ -37,6 +37,30 @@ export const ITEM_BOSSES = {}; Object.entries(BL).forEach(([b, items]) => items.
 export const bossesFor = it => ITEM_BOSSES[it] || [];
 export const primaryBoss = it => (ITEM_BOSSES[it] || [])[0] || null;
 
+// ── T6 tier tokens ↔ class set pieces ──
+// Raiders sometimes wishlist their class set piece instead of the token; compute() canonicalizes
+// piece rows (matched by item_id first, exact name as fallback) so both count as the same claim.
+export const TIER_TOKEN_PIECES = {
+  "Helm of the Forgotten Conqueror": [[30987, "Lightbringer Faceguard"], [30988, "Lightbringer Greathelm"], [30989, "Lightbringer War-Helm"], [31063, "Cowl of Absolution"], [31064, "Hood of Absolution"], [31051, "Hood of the Malefic"]],
+  "Pauldrons of the Forgotten Conqueror": [[30996, "Lightbringer Pauldrons"], [30997, "Lightbringer Shoulderbraces"], [30998, "Lightbringer Shoulderguards"], [31069, "Mantle of Absolution"], [31070, "Shoulderpads of Absolution"], [31054, "Mantle of the Malefic"]],
+  "Chestguard of the Forgotten Conqueror": [[30990, "Lightbringer Breastplate"], [30991, "Lightbringer Chestguard"], [30992, "Lightbringer Chestpiece"], [31065, "Shroud of Absolution"], [31066, "Vestments of Absolution"], [31052, "Robe of the Malefic"]],
+  "Gloves of the Forgotten Conqueror": [[30982, "Lightbringer Gauntlets"], [30983, "Lightbringer Gloves"], [30985, "Lightbringer Handguards"], [31060, "Gloves of Absolution"], [31061, "Handguards of Absolution"], [31050, "Gloves of the Malefic"]],
+  "Leggings of the Forgotten Conqueror": [[30993, "Lightbringer Greaves"], [30994, "Lightbringer Leggings"], [30995, "Lightbringer Legguards"], [31068, "Breeches of Absolution"], [31067, "Leggings of Absolution"], [31053, "Leggings of the Malefic"]],
+  "Helm of the Forgotten Protector": [[30972, "Onslaught Battle-Helm"], [30974, "Onslaught Greathelm"], [31003, "Gronnstalker's Helmet"], [31015, "Skyshatter Cover"], [31014, "Skyshatter Headguard"], [31012, "Skyshatter Helmet"]],
+  "Pauldrons of the Forgotten Protector": [[30979, "Onslaught Shoulderblades"], [30980, "Onslaught Shoulderguards"], [31006, "Gronnstalker's Spaulders"], [31023, "Skyshatter Mantle"], [31024, "Skyshatter Pauldrons"], [31022, "Skyshatter Shoulderpads"]],
+  "Chestguard of the Forgotten Protector": [[30975, "Onslaught Breastplate"], [30976, "Onslaught Chestguard"], [31004, "Gronnstalker's Chestguard"], [31017, "Skyshatter Breastplate"], [31016, "Skyshatter Chestguard"], [31018, "Skyshatter Tunic"]],
+  "Gloves of the Forgotten Protector": [[30969, "Onslaught Gauntlets"], [30970, "Onslaught Handguards"], [31001, "Gronnstalker's Gloves"], [31008, "Skyshatter Gauntlets"], [31007, "Skyshatter Gloves"], [31011, "Skyshatter Grips"]],
+  "Leggings of the Forgotten Protector": [[30977, "Onslaught Greaves"], [30978, "Onslaught Legguards"], [31005, "Gronnstalker's Leggings"], [31020, "Skyshatter Legguards"], [31019, "Skyshatter Leggings"], [31021, "Skyshatter Pants"]],
+  "Helm of the Forgotten Vanquisher": [[31027, "Slayer's Helm"], [31056, "Cowl of the Tempest"], [31039, "Thunderheart Cover"], [31040, "Thunderheart Headguard"], [31037, "Thunderheart Helmet"]],
+  "Pauldrons of the Forgotten Vanquisher": [[31030, "Slayer's Shoulderpads"], [31059, "Mantle of the Tempest"], [31048, "Thunderheart Pauldrons"], [31049, "Thunderheart Shoulderpads"], [31047, "Thunderheart Spaulders"]],
+  "Chestguard of the Forgotten Vanquisher": [[31028, "Slayer's Chestguard"], [31057, "Robes of the Tempest"], [31042, "Thunderheart Chestguard"], [31041, "Thunderheart Tunic"], [31043, "Thunderheart Vest"]],
+  "Gloves of the Forgotten Vanquisher": [[31026, "Slayer's Handguards"], [31055, "Gloves of the Tempest"], [31034, "Thunderheart Gauntlets"], [31032, "Thunderheart Gloves"], [31035, "Thunderheart Handguards"]],
+  "Leggings of the Forgotten Vanquisher": [[31029, "Slayer's Legguards"], [31058, "Leggings of the Tempest"], [31045, "Thunderheart Legguards"], [31044, "Thunderheart Leggings"], [31046, "Thunderheart Pants"]]
+};
+const PIECE_ID_TOKEN = {}, PIECE_NAME_TOKEN = {};
+Object.entries(TIER_TOKEN_PIECES).forEach(([tok, pcs]) => pcs.forEach(([id, n]) => { PIECE_ID_TOKEN[id] = tok; PIECE_NAME_TOKEN[n.toLowerCase()] = tok; }));
+export const tierTokenFor = (name, id) => PIECE_ID_TOKEN[parseInt(id)] || PIECE_NAME_TOKEN[String(name || "").trim().toLowerCase()] || null;
+
 export const isTierName = n => /Forgotten|Vanquished/.test(n) || n === "Verdant Sphere";
 export const REAGENTS = new Set(["Nether Vortex", "Verdant Sphere"]);
 

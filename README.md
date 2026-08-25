@@ -17,7 +17,7 @@ Or skip the terminal entirely: run `npm run build` once and open `dist/index.htm
 - Raiders enter their bid in the item's **Note** field on ThatsmyBIS — just the number (`100` or `100 pts`).
 - Bids are **blind** — nobody sees anyone else's numbers.
 - **Highest score wins.** Ties go to /roll.
-- Tier tokens count like any other item — bid on the **token name** (e.g. "Helm of the Forgotten Vanquisher"), not your class piece.
+- Tier tokens count like any other item — bid on the **token name** (e.g. "Helm of the Forgotten Vanquisher"). Listing your class set piece instead (e.g. "Skyshatter Helmet") also works: the app counts it as the token, and if both are listed only the highest single bid counts.
 - BoP craftables (Swiftsteel, Dawnsteel, Swiftstrike, Living Earth, Swiftheal, Nimble Thought pieces) are biddable and show under a "Crafted (BoP)" source.
 - The three BT trash rings (Band of Devastation, Blessed Band of Karabor, Ring of Ancient Knowledge) can be **listed twice** — each listing is its own bid and claim; winning one copy keeps the second bid in line.
 - Loot Council items and crafting reagents take no note bids — don't spend points on them. Waiting on an LC shortlist is free, but **receiving an LC item charges 100 points** of your budget from that moment on (each glaive counts separately) — the officers trim the raider's remaining bids to fit.

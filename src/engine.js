@@ -1,4 +1,4 @@
-import { BUDGET, LC_CHARGE, DUP_OK, isTierName, REAGENTS, DEF_STATS, bossesFor, primaryBoss } from './constants.js'
+import { BUDGET, LC_CHARGE, DUP_OK, isTierName, REAGENTS, DEF_STATS, bossesFor, primaryBoss, tierTokenFor } from './constants.js'
 
 // ── Score engine ──
 export function scoreParts(base, st, mod) {
@@ -33,10 +33,12 @@ export function compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, 
   const dupRecvN = {}, dupCrossN = {}; // per-pair receipt counts for DUP_OK items
   const ensure = (p, cls) => { if (!meta[p]) meta[p] = { cls: cls || "" }; if (cls && !meta[p].cls) meta[p].cls = cls; if (!alloc[p]) alloc[p] = {}; };
 
+  // T6 class set pieces listed instead of their token count as the token (both wishlist and received rows)
+  const canonName = r => { const n = (r.item_name || "").trim(); return n ? (tierTokenFor(n, r.item_id) || n) : n; };
   (tmbRows || []).forEach(r => {
     const p = (r.character_name || "").trim(); if (!p) return;
     ensure(p, r.character_class);
-    const it = (r.item_name || "").trim(); if (!it) return;
+    const it = canonName(r); if (!it) return;
     const pk = pairKey(p, it);
     if (r.type === "received") { if (DUP_OK.has(it)) dupRecvN[pk] = (dupRecvN[pk] || 0) + 1; else receivedTokens.add(pk); return; }
     if (r.type === "wishlist" && (r.received_at || "").trim()) { if (DUP_OK.has(it)) dupCrossN[pk] = (dupCrossN[pk] || 0) + 1; else crossed.add(pk); }
@@ -47,9 +49,24 @@ export function compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, 
   const tmbWish = {};  // player -> [{item,sort,bid}]  (crossed-off rows skipped per-row)
   (tmbRows || []).forEach(r => {
     if (r.type !== "wishlist") return;
-    const p = (r.character_name || "").trim(); const it = (r.item_name || "").trim();
+    const p = (r.character_name || "").trim(); const raw = (r.item_name || "").trim(); const it = canonName(r);
     if (!p || !it) return; if ((r.received_at || "").trim()) return;
-    (tmbWish[p] = tmbWish[p] || []).push({ item: it, sort: parseInt(r.sort_order) || 0, bid: parseBidNote(r.note) });
+    (tmbWish[p] = tmbWish[p] || []).push({ item: it, sort: parseInt(r.sort_order) || 0, bid: parseBidNote(r.note), via: it !== raw ? [raw] : undefined });
+  });
+  // canonicalization can leave a player with several rows for one token (token + set piece, or
+  // two set pieces) — collapse to a single claim at the highest bid, best rank, not a summed one
+  const viaOf = {}; // p -> {token: [original names]}
+  Object.keys(tmbWish).forEach(p => {
+    const first = {}; const out = [];
+    tmbWish[p].forEach(x => {
+      if (!isTierName(x.item)) { out.push(x); return; }
+      if (x.via) ((viaOf[p] = viaOf[p] || {})[x.item] = viaOf[p][x.item] || []).push(...x.via);
+      const e = first[x.item];
+      if (!e) { first[x.item] = x; out.push(x); return; }
+      if (x.bid !== null && x.bid > 0 && (e.bid === null || x.bid > e.bid)) e.bid = x.bid;
+      e.sort = Math.min(e.sort, x.sort);
+    });
+    tmbWish[p] = out;
   });
   const addClaim = (p, it, v) => {
     if (DUP_OK.has(it) && alloc[p][it] !== undefined) (dupQ[pairKey(p, it)] = dupQ[pairKey(p, it)] || []).push(v);
@@ -108,7 +125,7 @@ export function compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, 
   // but LC shortlist charges do)
   const budgets = {};
   Object.keys(alloc).forEach(p => {
-    const rows = Object.entries(alloc[p]).map(([it, pts]) => ({ item: it, pts, not: excluded(it), af: autoFill[p] && autoFill[p].has(it) }));
+    const rows = Object.entries(alloc[p]).map(([it, pts]) => ({ item: it, pts, not: excluded(it), af: autoFill[p] && autoFill[p].has(it), via: viaOf[p] && viaOf[p][it] }));
     Object.entries(dupQ).forEach(([pk, q]) => { if (!pk.startsWith(p + "\0")) return; const it = pk.slice(p.length + 1); q.forEach((pts, i) => rows.push({ item: it, pts, not: excluded(it), copy: i + 2 })); });
     rows.sort((a, b) => b.pts - a.pts);
     const charge = (lcCount[p] || 0) * LC_CHARGE;
@@ -185,7 +202,7 @@ export function compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, 
     const st = statOf(p, dw, db);
     const received = [...recvDisplay].filter(k => k.startsWith(p + "\0")).map(k => k.slice(p.length + 1));
     const wl = [];
-    Object.keys(work[p] || {}).forEach(it => { if (!(work[p][it] > 0)) return; if (excluded(it)) return; if (recv.has(pairKey(p, it))) return; if (dropSet.has(pairKey(p, it))) return; const res = items.find(x => x.item === it); const parts = scoreParts(work[p][it], st, mod); wl.push({ item: it, base: work[p][it], parts, final: parts.final, isWinner: res && res.winner === p, winner: res ? res.winner : null, status: res ? res.status : null }); });
+    Object.keys(work[p] || {}).forEach(it => { if (!(work[p][it] > 0)) return; if (excluded(it)) return; if (recv.has(pairKey(p, it))) return; if (dropSet.has(pairKey(p, it))) return; const res = items.find(x => x.item === it); const parts = scoreParts(work[p][it], st, mod); wl.push({ item: it, base: work[p][it], parts, final: parts.final, isWinner: res && res.winner === p, winner: res ? res.winner : null, status: res ? res.status : null, via: viaOf[p] && viaOf[p][it] }); });
     wl.sort((a, b) => b.base - a.base);
     players[p] = { cls: meta[p]?.cls || "", st, received, wishlist: wl, inLineFor: items.filter(x => x.winner === p).length, contenderOn: wl.length };
   });
