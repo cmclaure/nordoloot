@@ -54,3 +54,5 @@ Note on absences: marking out ahead of time avoids a strike, but it does not pro
 ## Practice data
 
 `fake-tmb-export-p3-notes.csv` is a fake 28-player roster with bids already filled in — import it to click around safely before using real data.
+
+- **Standings page** (raider-facing artifact): regenerate with `node tools/standings.mjs <nordoloot-save.json> out.html` — feed it the Export save file so stats, awards, LC lines, and officer edits are included (a raw TMB CSV works but uses defaults) — then republish the artifact at the same URL.
