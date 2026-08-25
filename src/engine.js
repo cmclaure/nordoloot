@@ -1,4 +1,4 @@
-import { BUDGET, LC_CHARGE, LC_UPFRONT, DUP_OK, isTierName, REAGENTS, DEF_STATS, bossesFor, primaryBoss, tierTokenFor } from './constants.js'
+import { BUDGET, LC_UPFRONT, lcChargeFor, DUP_OK, isTierName, REAGENTS, DEF_STATS, bossesFor, primaryBoss, tierTokenFor } from './constants.js'
 
 // ── Score engine ──
 export function scoreParts(base, st, mod) {
@@ -21,19 +21,20 @@ export const parseBidNote = n => { const m = String(n || "").trim().match(/^(\d{
 export function compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems) {
   const lcSet = new Set((lcItems || []).map(l => l.name));
   const excluded = it => lcSet.has(it) ? "lc" : REAGENTS.has(it) ? "reagent" : (excludeTier && isTierName(it)) ? "tier" : null;
-  // LC minus: the first LC_UPFRONT waiting spots on each shortlist pay LC_CHARGE upfront — being
-  // near the front of the line for a chase item costs points now, not just on receipt. Receiving
-  // keeps the same charge (it's the deposit converting, not a second fee); spots further back are
-  // free until the line moves; leaving the line refunds. Each glaive counts separately.
-  const lcCount = {}, lcListOf = {};
+  // LC minus: the first LC_UPFRONT waiting spots on each shortlist pay the item's charge upfront —
+  // being near the front of the line for a chase item costs points now, not just on receipt.
+  // Receiving keeps the same charge (it's the deposit converting, not a second fee); spots further
+  // back are free until the line moves; leaving the line refunds. One Warglaive entry = the pair (200).
+  const lcCharge = {}, lcListOf = {};
   (lcItems || []).forEach(l => {
+    const amt = lcChargeFor(l.name);
     let waiting = 0;
     (l.shortlist || []).forEach(s => {
       const p = (s.player || "").trim(); if (!p) return;
       const recv = s.status === "RECEIVED";
       if (!recv && waiting++ >= LC_UPFRONT) return;
-      lcCount[p] = (lcCount[p] || 0) + 1;
-      (lcListOf[p] = lcListOf[p] || []).push({ name: l.name, recv });
+      lcCharge[p] = (lcCharge[p] || 0) + amt;
+      (lcListOf[p] = lcListOf[p] || []).push({ name: l.name, recv, amt });
     });
   });
   const meta = {};              // player -> {cls}
@@ -94,7 +95,7 @@ export function compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, 
       // so a partial noter still lands on 500; no leftover (bids >= budget) means blanks get nothing
       const blanks = tmbWish[p].filter(x => (x.bid === null || x.bid <= 0) && !excluded(x.item));
       const notedSum = noted.reduce((a, x) => a + (excluded(x.item) ? 0 : x.bid), 0);
-      const remaining = Math.max(0, BUDGET - (lcCount[p] || 0) * LC_CHARGE - notedSum);
+      const remaining = Math.max(0, BUDGET - (lcCharge[p] || 0) - notedSum);
       if (blanks.length && remaining > 0) {
         blanks.sort((a, b) => a.sort - b.sort);
         const N = blanks.length; const wsum = blanks.reduce((a, _, i) => a + (N - i), 0) || 1;
@@ -107,7 +108,7 @@ export function compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, 
       const list = tmbWish[p].filter(x => !excluded(x.item));
       if (!list.length) return;
       const N = list.length; const wsum = list.reduce((a, _, i) => a + (N - i), 0) || 1;
-      const budgetFor = Math.max(0, BUDGET - (lcCount[p] || 0) * LC_CHARGE);
+      const budgetFor = Math.max(0, BUDGET - (lcCharge[p] || 0));
       list.sort((a, b) => a.sort - b.sort);
       list.forEach((x, i) => addClaim(p, x.item, Math.max(1, Math.round(budgetFor * (N - i) / wsum))));
     }
@@ -139,7 +140,7 @@ export function compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, 
     const rows = Object.entries(alloc[p]).map(([it, pts]) => ({ item: it, pts, not: excluded(it), af: autoFill[p] && autoFill[p].has(it), via: viaOf[p] && viaOf[p][it] }));
     Object.entries(dupQ).forEach(([pk, q]) => { if (!pk.startsWith(p + "\0")) return; const it = pk.slice(p.length + 1); q.forEach((pts, i) => rows.push({ item: it, pts, not: excluded(it), copy: i + 2 })); });
     rows.sort((a, b) => b.pts - a.pts);
-    const charge = (lcCount[p] || 0) * LC_CHARGE;
+    const charge = lcCharge[p] || 0;
     if (!rows.length && !charge) return;
     budgets[p] = { total: rows.filter(r => !r.not).reduce((a, r) => a + r.pts, 0) + charge, lcCharge: charge, lcList: lcListOf[p] || [], mode: budgetMode[p] || "auto", edited: !!((ptsOverrides || {})[p] && Object.keys(ptsOverrides[p]).length), items: rows };
   });
