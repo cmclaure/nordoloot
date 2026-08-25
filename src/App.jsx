@@ -144,8 +144,10 @@ export default function App() {
   // discord
   const genDiscord = useCallback((type) => {
     if (!data) return; let t = "";
-    if (type === "scores") { t = "**Nordoloot — Projected Winners**\n\n"; data.items.forEach(i => { t += `${i.item} → ${i.winner} (${i.contenders[0].final.toFixed(0)}) [${i.status}]\n`; }); }
-    else if (type === "tonight") { t = `**Tonight's Raid — ${raid}**\n\n`; raidBossList.forEach(b => { const its = data.items.filter(i => i.bosses.includes(b)); if (!its.length) return; t += `__${b}__\n`; its.forEach(i => { t += `${i.item} → ${i.winner} (${i.contenders[0].final.toFixed(0)}) [${i.status}]\n`; }); t += "\n"; }); }
+    // raider-facing exports carry no status tags — only a tie's /roll gets called out
+    const line = i => i.status === "ROLL" ? `${i.item} → /roll between ${i.tied.join(", ")} (${i.contenders[0].final.toFixed(0)})\n` : `${i.item} → ${i.winner} (${i.contenders[0].final.toFixed(0)})\n`;
+    if (type === "scores") { t = "**Nordoloot — Projected Winners**\n\n"; data.items.forEach(i => { t += line(i); }); }
+    else if (type === "tonight") { t = `**Tonight's Raid — ${raid}**\n\n`; raidBossList.forEach(b => { const its = data.items.filter(i => i.bosses.includes(b)); if (!its.length) return; t += `__${b}__\n`; its.forEach(i => { t += line(i); }); t += "\n"; }); }
     else if (type === "awarded") { t = "**Loot Awarded This Session**\n\n"; awardLog.forEach(a => { t += `${a.player} ← ${a.item}${a.wasRoll ? " (roll)" : ""} ${a.ts}\n`; }); }
     setDiscord(t);
   }, [data, awardLog, raid, raidBossList]);
