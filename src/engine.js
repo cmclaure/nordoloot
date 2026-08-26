@@ -45,8 +45,13 @@ export function compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, 
   const dupRecvN = {}, dupCrossN = {}; // per-pair receipt counts for DUP_OK items
   const ensure = (p, cls) => { if (!meta[p]) meta[p] = { cls: cls || "" }; if (cls && !meta[p].cls) meta[p].cls = cls; if (!alloc[p]) alloc[p] = {}; };
 
-  // T6 class set pieces listed instead of their token count as the token (both wishlist and received rows)
-  const canonName = r => { const n = (r.item_name || "").trim(); return n ? (tierTokenFor(n, r.item_id) || n) : n; };
+  // T6 class set pieces listed instead of their token count as the token (both wishlist and received
+  // rows); TMB's per-hand glaive names fold into the one LC item so they're excluded like it
+  const canonName = r => {
+    let n = (r.item_name || "").trim(); if (!n) return n;
+    n = n.replace(/^(Warglaive of Azzinoth)\s*\((?:mainhand|offhand)\)$/i, "$1");
+    return tierTokenFor(n, r.item_id) || n;
+  };
   (tmbRows || []).forEach(r => {
     const p = (r.character_name || "").trim(); if (!p) return;
     ensure(p, r.character_class);
