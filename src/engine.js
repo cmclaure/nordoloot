@@ -21,10 +21,10 @@ export const parseBidNote = n => { const m = String(n || "").trim().match(/^(\d{
 export function compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems) {
   const lcSet = new Set((lcItems || []).map(l => l.name));
   const excluded = it => lcSet.has(it) ? "lc" : REAGENTS.has(it) ? "reagent" : (excludeTier && isTierName(it)) ? "tier" : null;
-  // LC minus: the first LC_UPFRONT waiting spots on each shortlist pay the item's charge upfront —
-  // being near the front of the line for a chase item costs points now, not just on receipt.
-  // Receiving keeps the same charge (it's the deposit converting, not a second fee); spots further
-  // back are free until the line moves; leaving the line refunds. One Warglaive entry = the pair (200).
+  // LC minus: the front LC_UPFRONT waiting spot(s) on each shortlist pay the item's charge upfront —
+  // holding the front of the line for a chase item costs points now; everyone behind pays on receipt.
+  // Receiving keeps the same charge (the deposit converts, no second fee); leaving the front spot
+  // refunds. One Warglaive entry = the pair (200).
   const lcCharge = {}, lcListOf = {};
   (lcItems || []).forEach(l => {
     const amt = lcChargeFor(l.name);

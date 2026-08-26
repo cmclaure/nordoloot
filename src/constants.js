@@ -2,7 +2,7 @@
 export const CC = { Warrior: "#C69B6D", Paladin: "#F48CBA", Hunter: "#AAD372", Rogue: "#FFF468", Priest: "#FFFFFF", Shaman: "#0070DD", Mage: "#3FC7EB", Warlock: "#8788EE", Druid: "#FF7C0A" };
 export const BUDGET = 500;
 export const LC_CHARGE = 100;  // budget cost per LC shortlist spot
-export const LC_UPFRONT = 3;   // the first N waiting spots on each LC shortlist pay upfront
+export const LC_UPFRONT = 1;   // only the front waiting spot on each LC shortlist pays upfront; the rest pay on receipt
 // One Warglaive entry means chasing the pair — charged as both, no double-listing needed
 export const LC_CHARGES = { "Warglaive of Azzinoth": 200 };
 export const lcChargeFor = name => LC_CHARGES[name] !== undefined ? LC_CHARGES[name] : LC_CHARGE;

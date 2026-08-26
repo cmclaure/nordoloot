@@ -328,7 +328,7 @@ export default function App() {
           <div style={{ display: "flex", gap: 6, marginBottom: 12, alignItems: "center" }}>
             <input type="text" placeholder="Add LC item by name…" value={lcNew} onChange={e => setLcNew(e.target.value)} onKeyDown={e => e.key === "Enter" && lcAddItem()} style={{ padding: "5px 8px", width: 280, fontSize: 12 }} />
             <button className="btn" onClick={lcAddItem} style={{ color: "#4ade80", borderColor: "#2d4a2d" }}>+ Add item</button>
-            <span className="sub">LC items are handled as manual shortlists — the first {LC_UPFRONT} waiting spots pay their charge upfront (marked below); receiving keeps that same charge. Further back in line is free until the line moves; leaving the line refunds. One Warglaive entry = chasing the pair, charged {lcChargeFor("Warglaive of Azzinoth")} — don't list anyone twice.</span>
+            <span className="sub">LC items are handled as manual shortlists — the front of each line pays its charge upfront (marked below); everyone behind pays on receipt instead. Stepping out of the front spot refunds. One Warglaive entry = chasing the pair, charged {lcChargeFor("Warglaive of Azzinoth")} — don't list anyone twice.</span>
           </div>
           {lcItems.map((lc, li) => (<div className="card" key={li}>
             <div className="card-h">
@@ -382,7 +382,7 @@ export default function App() {
 
         {/* ══ BUDGETS ══ */}
         {view === "budget" && (<div>
-          <div className="sub" style={{ marginBottom: 8 }}>Point bids come from each wishlist item's note in the TMB export (a bare number, e.g. <code>100</code>). Players with no note-bids get rank-derived auto points and aren't checked against the {BUDGET} budget; partial noters have their un-noted items auto-filled from the leftover (marked below). A tier set piece listed instead of its token counts as the token (marked below; duplicates collapse to the highest single bid). The first {LC_UPFRONT} waiting spots on an LC shortlist — and every RECEIVED LC item — charge toward the total ({LC_CHARGE}; Warglaives {lcChargeFor("Warglaive of Azzinoth")} for the pair). Officer edits persist and survive re-imports.</div>
+          <div className="sub" style={{ marginBottom: 8 }}>Point bids come from each wishlist item's note in the TMB export (a bare number, e.g. <code>100</code>). Players with no note-bids get rank-derived auto points and aren't checked against the {BUDGET} budget; partial noters have their un-noted items auto-filled from the leftover (marked below). A tier set piece listed instead of its token counts as the token (marked below; duplicates collapse to the highest single bid). The front spot of an LC line — and every RECEIVED LC item — charges toward the total ({LC_CHARGE}; Warglaives {lcChargeFor("Warglaive of Azzinoth")} for the pair). Officer edits persist and survive re-imports.</div>
           <div style={{ overflowX: "auto", maxHeight: "calc(100vh - 300px)", overflowY: "auto" }}>
             <table><thead><tr><th>Player</th><th>Source</th><th>Items</th><th>Total</th><th>Status</th><th></th></tr></thead>
               <tbody>{Object.keys(data.budgets).sort((a, b) => a.localeCompare(b)).map(p => {
@@ -405,7 +405,7 @@ export default function App() {
                     <tr><td colSpan={6} style={{ background: "#141414", padding: "8px 14px" }}>
                       {b.lcList.map((n, i) => (
                         <div key={"lc" + i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "3px 0" }}>
-                          <span style={{ flex: 1, fontSize: 12 }} className="gold">{n.name} <span className="sub">{n.recv ? "LC item received" : `LC line (top ${LC_UPFRONT})`}</span></span>
+                          <span style={{ flex: 1, fontSize: 12 }} className="gold">{n.name} <span className="sub">{n.recv ? "LC item received" : "next in LC line"}</span></span>
                           <span className="gold" style={{ fontWeight: 600, fontSize: 12, width: 52, textAlign: "center" }}>{n.amt}</span>
                         </div>))}
                       {b.items.map((r, ri) => (

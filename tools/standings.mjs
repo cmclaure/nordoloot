@@ -55,7 +55,7 @@ const lcHtml = lcItems.some(l => (l.shortlist || []).length) ? `
     return `<div class="lc"><div class="lc-name">${esc(l.name)}</div>${l.shortlist.map((s, i) => {
       const recv = s.status === "RECEIVED";
       const charged = recv || (w++ < LC_UPFRONT);
-      return `<div class="row"><span class="item"><span class="pos">${i + 1}</span> ${esc(s.player)}${recv ? ' <span class="tag">received</span>' : s.status ? ` <span class="tag dim">${esc(s.status.toLowerCase())}</span>` : ""}</span><span class="res dim">${charged ? `−${amt} pts` : "free (waiting)"}</span></div>`;
+      return `<div class="row"><span class="item"><span class="pos">${i + 1}</span> ${esc(s.player)}${recv ? ' <span class="tag">received</span>' : s.status ? ` <span class="tag dim">${esc(s.status.toLowerCase())}</span>` : ""}</span><span class="res dim">${charged ? `−${amt} pts` : "pays on receipt"}</span></div>`;
     }).join("\n")}</div>`;
   }).join("\n")}` : "";
 
