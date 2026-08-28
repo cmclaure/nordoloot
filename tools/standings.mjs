@@ -46,7 +46,7 @@ const itemLine = i => {
 
 const awardsHtml = (data.logView || []).length ? `
   <h2>Loot awarded so far</h2>
-  ${data.logView.slice().reverse().map(a => `<div class="row"><span class="item">${esc(a.player)} <span class="dim">←</span> ${esc(a.item)}${a.wasRoll ? ' <span class="tag">won /roll</span>' : ""}</span><span class="res dim">${esc(a.ts || "")}${a.spent > 0 ? ` · ${a.spent.toFixed(0)} pts spent` : ""}</span></div>`).join("\n")}` : "";
+  ${data.logView.slice().reverse().map(a => `<div class="row"><span class="item">${esc(a.player)} <span class="dim">-</span> ${esc(a.item)}${a.wasRoll ? ' <span class="tag">won /roll</span>' : ""}</span><span class="res dim">${esc(a.ts || "")}${a.spent > 0 ? ` · ${a.spent.toFixed(0)} pts spent` : ""}</span></div>`).join("\n")}` : "";
 
 const lcHtml = lcItems.some(l => (l.shortlist || []).length) ? `
   <h2>Loot Council lines</h2>
