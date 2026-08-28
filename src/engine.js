@@ -64,10 +64,18 @@ export function compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, 
   // Base points come from wishlist-item notes; players with no note-bids fall back to
   // sort_order-derived auto-allocation. Officer overrides layer on top of either.
   const tmbWish = {};  // player -> [{item,sort,bid}]  (crossed-off rows skipped per-row)
+  // points burn on win: a crossed-off (received) row's noted bid stays spent — it still counts
+  // against the 500 and never flows back into auto-fill
+  const spentOf = {}; // p -> [{item, pts}]
   (tmbRows || []).forEach(r => {
     if (r.type !== "wishlist") return;
     const p = (r.character_name || "").trim(); const raw = (r.item_name || "").trim(); const it = canonName(r);
-    if (!p || !it) return; if ((r.received_at || "").trim()) return;
+    if (!p || !it) return;
+    if ((r.received_at || "").trim()) {
+      const b = parseBidNote(r.note);
+      if (b !== null && b > 0 && !excluded(it)) (spentOf[p] = spentOf[p] || []).push({ item: it, pts: b });
+      return;
+    }
     (tmbWish[p] = tmbWish[p] || []).push({ item: it, sort: parseInt(r.sort_order) || 0, bid: parseBidNote(r.note), via: it !== raw ? [raw] : undefined });
   });
   // canonicalization can leave a player with several rows for one token (token + set piece, or
@@ -100,7 +108,8 @@ export function compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, 
       // so a partial noter still lands on 500; no leftover (bids >= budget) means blanks get nothing
       const blanks = tmbWish[p].filter(x => (x.bid === null || x.bid <= 0) && !excluded(x.item));
       const notedSum = noted.reduce((a, x) => a + (excluded(x.item) ? 0 : x.bid), 0);
-      const remaining = Math.max(0, BUDGET - (lcCharge[p] || 0) - notedSum);
+      const spentSum = (spentOf[p] || []).reduce((a, x) => a + x.pts, 0);
+      const remaining = Math.max(0, BUDGET - (lcCharge[p] || 0) - notedSum - spentSum);
       if (blanks.length && remaining > 0) {
         blanks.sort((a, b) => a.sort - b.sort);
         const N = blanks.length; const wsum = blanks.reduce((a, _, i) => a + (N - i), 0) || 1;
@@ -120,6 +129,8 @@ export function compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, 
     const ov = (ptsOverrides || {})[p];
     if (ov) Object.entries(ov).forEach(([it, v]) => { const n = +v || 0; if (n > 0) alloc[p][it] = n; else { delete alloc[p][it]; delete dupQ[pairKey(p, it)]; } });
   });
+  // a player whose every noted item was received still budgets as a noter, not AUTO
+  Object.keys(spentOf).forEach(p => { if (!budgetMode[p]) budgetMode[p] = "notes"; });
   // biggest bid is the active claim; the rest queue behind it
   Object.keys(dupQ).forEach(pk => {
     const [p, it] = pk.split("\0");
@@ -144,6 +155,7 @@ export function compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, 
   Object.keys(alloc).forEach(p => {
     const rows = Object.entries(alloc[p]).map(([it, pts]) => ({ item: it, pts, not: excluded(it), af: autoFill[p] && autoFill[p].has(it), via: viaOf[p] && viaOf[p][it] }));
     Object.entries(dupQ).forEach(([pk, q]) => { if (!pk.startsWith(p + "\0")) return; const it = pk.slice(p.length + 1); q.forEach((pts, i) => rows.push({ item: it, pts, not: excluded(it), copy: i + 2 })); });
+    (spentOf[p] || []).forEach(x => rows.push({ item: x.item, pts: x.pts, won: true }));
     rows.sort((a, b) => b.pts - a.pts);
     const charge = lcCharge[p] || 0;
     if (!rows.length && !charge) return;
