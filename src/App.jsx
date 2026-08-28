@@ -513,10 +513,11 @@ export default function App() {
               </div>
               {pl.wishlist.length > 0 && (<>
                 <div className="sub" style={{ marginBottom: 4, textTransform: "uppercase" }}>Wishlist (active claims)</div>
-                <table><thead><tr><th>Item</th><th>Base</th><th>Final</th><th>Status</th></tr></thead>
+                <table><thead><tr><th>Item</th><th>Base</th><th>Final</th><th>Place</th><th>Status</th></tr></thead>
                   <tbody>{pl.wishlist.map(w => (
                     <tr key={w.item} style={{ background: w.isWinner ? "#141f14" : "transparent" }}>
                       <td>{w.item}{w.via && <span className="sub" style={{ marginLeft: 6, color: "#F48CBA" }}>listed as {w.via.join(", ")}</span>}</td><td style={{ fontWeight: 600 }}>{w.base.toFixed(0)}</td><td className="gold" style={{ fontWeight: 600 }}>{w.final.toFixed(1)}</td>
+                      <td>{w.rank ? <span style={{ fontWeight: 600, color: w.rank === 1 ? "#4ade80" : w.rank === 2 ? "#fbbf24" : "#96938d" }}>{w.rank}<span className="dim" style={{ fontWeight: 400 }}> of {w.count}</span></span> : <span className="dim">—</span>}</td>
                       <td>{w.isWinner ? <span className="tag tag-c">{w.status === "UNCONTESTED" ? "UNCONTESTED" : "PROJECTED WIN"}</span> : w.winner ? <span className="sub">→ {w.winner}</span> : <span className="dim" style={{ fontSize: 10 }}>—</span>}</td>
                     </tr>))}</tbody></table>
               </>)}

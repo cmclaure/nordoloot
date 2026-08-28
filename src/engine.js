@@ -231,7 +231,7 @@ export function compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, 
     const st = statOf(p, dw, db);
     const received = [...recvDisplay].filter(k => k.startsWith(p + "\0")).map(k => k.slice(p.length + 1));
     const wl = [];
-    Object.keys(work[p] || {}).forEach(it => { if (!(work[p][it] > 0)) return; if (excluded(it)) return; if (recv.has(pairKey(p, it))) return; if (dropSet.has(pairKey(p, it))) return; const res = items.find(x => x.item === it); const parts = scoreParts(work[p][it], st, mod); wl.push({ item: it, base: work[p][it], parts, final: parts.final, isWinner: res && res.winner === p, winner: res ? res.winner : null, status: res ? res.status : null, via: viaOf[p] && viaOf[p][it] }); });
+    Object.keys(work[p] || {}).forEach(it => { if (!(work[p][it] > 0)) return; if (excluded(it)) return; if (recv.has(pairKey(p, it))) return; if (dropSet.has(pairKey(p, it))) return; const res = items.find(x => x.item === it); const parts = scoreParts(work[p][it], st, mod); const rank = res ? res.contenders.findIndex(c => c.player === p) + 1 : 0; wl.push({ item: it, base: work[p][it], parts, final: parts.final, isWinner: res && res.winner === p, winner: res ? res.winner : null, status: res ? res.status : null, rank: rank > 0 ? rank : null, count: res ? res.count : null, via: viaOf[p] && viaOf[p][it] }); });
     wl.sort((a, b) => b.base - a.base);
     players[p] = { cls: meta[p]?.cls || "", st, received, wishlist: wl, inLineFor: items.filter(x => x.winner === p).length, contenderOn: wl.length };
   });
