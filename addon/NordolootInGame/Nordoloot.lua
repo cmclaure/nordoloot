@@ -33,20 +33,29 @@ local function announce(text)
 end
 
 local function parseImport(text)
+  -- the client escapes "|" as "||" inside editboxes; undo that before parsing
+  text = text:gsub("||", "|")
   local items, byName, n = {}, {}, 0
+  local firstBad
   for line in text:gmatch("[^\r\n]+") do
-    if line ~= "NDL1" then
-      local id, name, display = line:match("^(%d+)|([^|]+)|(.+)$")
+    if line ~= "NDL1" and line ~= "NDL2" then
+      local id, name, display = line:match("^(%d+)~([^~]+)~(.+)$")
+      if not id then id, name, display = line:match("^(%d+)|([^|]+)|(.+)$") end
       if id and name and display then
         id = tonumber(id)
         local entry = { name = name, display = display }
         if id and id > 0 then items[id] = entry end
         byName[name] = entry
         n = n + 1
+      elseif not firstBad then
+        firstBad = line:sub(1, 60)
       end
     end
   end
-  if n == 0 then return nil end
+  if n == 0 then
+    if firstBad then msgOut("could not parse: \"" .. firstBad .. "\"") end
+    return nil
+  end
   return { items = items, byName = byName, count = n, imported = date("%b %d %H:%M") }
 end
 

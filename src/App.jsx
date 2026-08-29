@@ -151,10 +151,11 @@ export default function App() {
       // paste string for the in-game addon: id|name|preformatted raid-warning line
       const idOf = { ...TIER_TOKEN_IDS };
       (tmbRows || []).forEach(r => { const raw = (r.item_name || "").trim(); const id = parseInt(r.item_id); if (!raw || !id) return; if (!tierTokenFor(raw, r.item_id)) idOf[raw] = id; });
-      t = "NDL1\n";
+      // "~" delimiter — WoW escapes "|" in editboxes, which broke the v1 pipe format
+      t = "NDL2\n";
       data.items.forEach(i => {
         const msg = i.status === "ROLL" ? `${i.item} - /roll: ${i.tied.join(", ")} (${i.contenders[0].final.toFixed(0)})` : `${i.item} - ${i.winner} (${i.contenders[0].final.toFixed(0)})`;
-        t += `${idOf[i.item] || 0}|${i.item}|${msg}\n`;
+        t += `${idOf[i.item] || 0}~${i.item}~${msg}\n`;
       });
     }
     else if (type === "tonight") { t = `**Tonight's Raid — ${raid}**\n\n`; raidBossList.forEach(b => { const its = data.items.filter(i => i.bosses.includes(b)); if (!its.length) return; t += `__${b}__\n`; its.forEach(i => { t += line(i); }); t += "\n"; }); }
