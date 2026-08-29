@@ -1,0 +1,7 @@
+## Interface: 20504
+## Title: Nordoloot
+## Notes: Raid-warns Nordoloot projected winners when boss loot opens. /ndl to import.
+## Author: Nordolo
+## Version: 1.0
+## SavedVariables: NordolootDB
+Nordoloot.lua

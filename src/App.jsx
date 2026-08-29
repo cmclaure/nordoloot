@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import Papa from 'papaparse'
-import { CC, BT, MH, RAID_BOSSES, CRAFTED, BUDGET, LC_CHARGE, LC_UPFRONT, lcChargeFor, MOD_DEF, DEF_STATS, DEFAULT_LC } from './constants.js'
+import { CC, BT, MH, RAID_BOSSES, CRAFTED, BUDGET, LC_CHARGE, LC_UPFRONT, lcChargeFor, MOD_DEF, DEF_STATS, DEFAULT_LC, TIER_TOKEN_IDS, tierTokenFor } from './constants.js'
 import { compute, LS, loadLS } from './engine.js'
 
 // merge a saved modifier object over MOD_DEF so keys added later pick up defaults
@@ -147,10 +147,20 @@ export default function App() {
     // raider-facing exports carry no status tags — only a tie's /roll gets called out
     const line = i => i.status === "ROLL" ? `${i.item} - /roll between ${i.tied.join(", ")} (${i.contenders[0].final.toFixed(0)})\n` : `${i.item} - ${i.winner} (${i.contenders[0].final.toFixed(0)})\n`;
     if (type === "scores") { t = "**Nordoloot — Projected Winners**\n\n"; data.items.forEach(i => { t += line(i); }); }
+    else if (type === "addon") {
+      // paste string for the in-game addon: id|name|preformatted raid-warning line
+      const idOf = { ...TIER_TOKEN_IDS };
+      (tmbRows || []).forEach(r => { const raw = (r.item_name || "").trim(); const id = parseInt(r.item_id); if (!raw || !id) return; if (!tierTokenFor(raw, r.item_id)) idOf[raw] = id; });
+      t = "NDL1\n";
+      data.items.forEach(i => {
+        const msg = i.status === "ROLL" ? `${i.item} - /roll: ${i.tied.join(", ")} (${i.contenders[0].final.toFixed(0)})` : `${i.item} - ${i.winner} (${i.contenders[0].final.toFixed(0)})`;
+        t += `${idOf[i.item] || 0}|${i.item}|${msg}\n`;
+      });
+    }
     else if (type === "tonight") { t = `**Tonight's Raid — ${raid}**\n\n`; raidBossList.forEach(b => { const its = data.items.filter(i => i.bosses.includes(b)); if (!its.length) return; t += `__${b}__\n`; its.forEach(i => { t += line(i); }); t += "\n"; }); }
     else if (type === "awarded") { t = "**Loot Awarded This Session**\n\n"; awardLog.forEach(a => { t += `${a.player} - ${a.item}${a.wasRoll ? " (roll)" : ""} ${a.ts}\n`; }); }
     setDiscord(t);
-  }, [data, awardLog, raid, raidBossList]);
+  }, [data, awardLog, raid, raidBossList, tmbRows]);
   const copyDiscord = useCallback(() => { navigator.clipboard.writeText(discord); }, [discord]);
 
   // LC ops
@@ -276,6 +286,7 @@ export default function App() {
             </select>
             <input type="text" placeholder="Search item or player…" value={search} onChange={e => setSearch(e.target.value)} style={{ marginLeft: "auto", padding: "3px 8px", fontSize: 11, width: 190 }} />
             <button className="btn btn-sm" onClick={() => genDiscord("scores")} style={{ color: "#4ade80" }}>Discord</button>
+            <button className="btn btn-sm" onClick={() => genDiscord("addon")} style={{ color: "#56c8ea" }} title="Copy into the in-game Nordoloot addon (/ndl)">Addon</button>
           </div>
           <div style={{ overflowX: "auto", maxHeight: "calc(100vh - 300px)", overflowY: "auto" }}>
             <table><thead><tr><th>Item</th><th>Status</th><th>Top contenders</th><th>Gap</th><th>Actions</th></tr></thead>

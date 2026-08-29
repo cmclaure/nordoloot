@@ -41,6 +41,7 @@ Or skip the terminal entirely: run `npm run build` once and open `dist/index.htm
 - **Drop** removes one player's claim (they got the item outside raid) — doesn't count as a win, item stays live for everyone else.
 - **LC Items** tab: manual shortlists for council items like the Skull and Warglaives.
 - **Discord** buttons copy a formatted summary (projected winners, tonight's predictions, or the award log) to paste into the guild server.
+- **In-game addon**: copy `addon/Nordoloot/` into `World of Warcraft/_classic_/Interface/AddOns/`. In the app, click **Addon** (Scores tab) and copy the export; in-game type `/ndl`, paste, Import. Opening boss loot then raid-warns each recognized item as `Item - Winner (points)` (ties as `/roll: A, B`). Re-export and re-paste whenever bids or awards change. `/ndl on|off` toggles, `/ndl status` shows what's loaded. Raid Warning needs lead/assist; otherwise it falls back to /raid.
 
 ## Scoring
 

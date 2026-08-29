@@ -61,6 +61,14 @@ export const TIER_TOKEN_PIECES = {
   "Gloves of the Forgotten Vanquisher": [[31026, "Slayer's Handguards"], [31055, "Gloves of the Tempest"], [31034, "Thunderheart Gauntlets"], [31032, "Thunderheart Gloves"], [31035, "Thunderheart Handguards"]],
   "Leggings of the Forgotten Vanquisher": [[31029, "Slayer's Legguards"], [31058, "Leggings of the Tempest"], [31045, "Thunderheart Legguards"], [31044, "Thunderheart Leggings"], [31046, "Thunderheart Pants"]]
 };
+// token item ids (for the in-game addon export — drops arrive as the token, not a class piece)
+export const TIER_TOKEN_IDS = {
+  "Helm of the Forgotten Conqueror": 31097, "Helm of the Forgotten Protector": 31095, "Helm of the Forgotten Vanquisher": 31096,
+  "Pauldrons of the Forgotten Conqueror": 31101, "Pauldrons of the Forgotten Protector": 31103, "Pauldrons of the Forgotten Vanquisher": 31102,
+  "Chestguard of the Forgotten Conqueror": 31089, "Chestguard of the Forgotten Protector": 31091, "Chestguard of the Forgotten Vanquisher": 31090,
+  "Gloves of the Forgotten Conqueror": 31092, "Gloves of the Forgotten Protector": 31094, "Gloves of the Forgotten Vanquisher": 31093,
+  "Leggings of the Forgotten Conqueror": 31098, "Leggings of the Forgotten Protector": 31100, "Leggings of the Forgotten Vanquisher": 31099
+};
 const PIECE_ID_TOKEN = {}, PIECE_NAME_TOKEN = {};
 Object.entries(TIER_TOKEN_PIECES).forEach(([tok, pcs]) => pcs.forEach(([id, n]) => { PIECE_ID_TOKEN[id] = tok; PIECE_NAME_TOKEN[n.toLowerCase()] = tok; }));
 export const tierTokenFor = (name, id) => PIECE_ID_TOKEN[parseInt(id)] || PIECE_NAME_TOKEN[String(name || "").trim().toLowerCase()] || null;
