@@ -1,9 +1,11 @@
 -- Nordoloot: announces projected winners (from the Nordoloot app's "Addon" export)
 -- in Raid Warning when boss loot is opened.
--- /ndl        - open the import window (paste the export string, click Import)
--- /ndl on|off - toggle announcements
--- /ndl clear  - wipe imported data
--- /ndl status - show what's loaded
+-- /ndl          - open the import window (paste the export string, click Import)
+-- /ndl on|off   - toggle announcements
+-- /ndl clear    - wipe imported data
+-- /ndl status   - show what's loaded
+-- /ndl test [n] - fake n random drops (default 3), printed only to you
+-- /ndl testlive - same, but through the real raid-warning path
 
 local ADDON = ...
 NordolootDB = NordolootDB or nil
@@ -64,6 +66,21 @@ local function onLootOpened()
         announce(entry.display)
       end
     end
+  end
+end
+
+-- fake drops from the imported pool; never touches the announced-set, so a tested
+-- item still announces for real when it actually drops
+local function testDrops(n, live)
+  if not NordolootDB then msgOut("no data - /ndl to import first") return end
+  local pool = {}
+  for _, entry in pairs(NordolootDB.byName) do pool[#pool + 1] = entry end
+  if #pool == 0 then msgOut("import is empty") return end
+  n = math.min(n or 3, #pool)
+  msgOut("simulating " .. n .. " drop" .. (n == 1 and "" or "s") .. (live and " (LIVE - real announce path)" or " (local only)"))
+  for i = 1, n do
+    local pick = table.remove(pool, math.random(#pool))
+    if live then announce(pick.display) else msgOut("|cff56c8ea[test]|r " .. pick.display) end
   end
 end
 
@@ -137,7 +154,10 @@ SLASH_NORDOLOOT1 = "/ndl"
 SLASH_NORDOLOOT2 = "/nordoloot"
 SlashCmdList["NORDOLOOT"] = function(arg)
   arg = (arg or ""):lower():gsub("^%s+", ""):gsub("%s+$", "")
-  if arg == "on" then enabled = true; msgOut("announcements ON")
+  local tn = arg:match("^test%s+(%d+)$")
+  if arg == "test" or tn then testDrops(tonumber(tn), false)
+  elseif arg == "testlive" then testDrops(3, true)
+  elseif arg == "on" then enabled = true; msgOut("announcements ON")
   elseif arg == "off" then enabled = false; msgOut("announcements OFF")
   elseif arg == "clear" then NordolootDB = nil; announced = {}; msgOut("data cleared")
   elseif arg == "status" then
