@@ -43,8 +43,8 @@ local function parseImport(text)
       if not id then id, name, display = line:match("^(%d+)|([^|]+)|(.+)$") end
       if id and name and display then
         id = tonumber(id)
-        local entry = { name = name, display = display }
-        if id and id > 0 then items[id] = entry end
+        local entry = { name = name, display = display, id = (id and id > 0) and id or nil }
+        if entry.id then items[entry.id] = entry end
         byName[name] = entry
         n = n + 1
       elseif not firstBad then
@@ -57,6 +57,15 @@ local function parseImport(text)
     return nil
   end
   return { items = items, byName = byName, count = n, imported = date("%b %d %H:%M") }
+end
+
+-- swap the leading item name for a clickable link when one is available
+local function displayWithLink(entry, link)
+  if not link and entry.id then link = select(2, GetItemInfo(entry.id)) end
+  if link and entry.display:sub(1, #entry.name) == entry.name then
+    return link .. entry.display:sub(#entry.name + 1)
+  end
+  return entry.display
 end
 
 local function onLootOpened()
@@ -72,7 +81,7 @@ local function onLootOpened()
       end
       if entry and not announced[entry.name] then
         announced[entry.name] = true
-        announce(entry.display)
+        announce(displayWithLink(entry, link))
       end
     end
   end
@@ -89,7 +98,8 @@ local function testDrops(n, live)
   msgOut("simulating " .. n .. " drop" .. (n == 1 and "" or "s") .. (live and " (LIVE - real announce path)" or " (local only)"))
   for i = 1, n do
     local pick = table.remove(pool, math.random(#pool))
-    if live then announce(pick.display) else msgOut("|cff56c8ea[test]|r " .. pick.display) end
+    local text = displayWithLink(pick, nil)
+    if live then announce(text) else msgOut("|cff56c8ea[test]|r " .. text) end
   end
 end
 
