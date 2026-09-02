@@ -30,6 +30,7 @@ export default function App() {
   const [confirmReset, setConfirmReset] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
   const [dropsOpen, setDropsOpen] = useState(false);
+  const [wclPreview, setWclPreview] = useState(null);
   const [dropTarget, setDropTarget] = useState(null); // item obj for drop-a-player modal
   const [drag, setDrag] = useState(null);
   const [savedFlash, setSavedFlash] = useState(false);
@@ -120,6 +121,37 @@ export default function App() {
     setAward(null); setDetail(null);
   }, []);
   const undoAward = useCallback(i => setAwardLog(prev => prev.filter((_, j) => j !== i)), []);
+
+  // Warcraft Logs attendance CSV: "Name","Att.%", then one column per raid with 1/blank
+  const importWCL = useCallback((file) => {
+    if (!file || !data) return;
+    const rd = new FileReader();
+    rd.onload = e => {
+      const res = Papa.parse(e.target.result, { header: true, skipEmptyLines: true });
+      const raidCols = (res.meta.fields || []).filter(f => f && f !== "Name" && f !== "Att.%");
+      if (!raidCols.length || !res.data.length) { setWclPreview({ error: "No raid columns found — is this the Warcraft Logs attendance export?" }); return; }
+      const norm = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+      const roster = {}; data.allPlayers.forEach(p => roster[norm(p)] = p);
+      const rows = [], unmatched = [];
+      res.data.forEach(r => {
+        const wname = String(r.Name || "").trim(); if (!wname) return;
+        const att = raidCols.filter(c => String(r[c] || "").trim() !== "" && String(r[c]).trim() !== "0").length;
+        const pct = Math.round(att / raidCols.length * 100);
+        const p = roster[norm(wname)];
+        if (p) rows.push({ wcl: wname, player: p, att, held: raidCols.length, pct, old: (baseStats[p] || DEF_STATS).attendance });
+        else unmatched.push(`${wname} (${att}/${raidCols.length})`);
+      });
+      const matchedSet = new Set(rows.map(x => x.player));
+      const missing = data.allPlayers.filter(p => !matchedSet.has(p));
+      setWclPreview({ rows, unmatched, missing, raids: raidCols.join(", ") });
+    };
+    rd.readAsText(file);
+  }, [data, baseStats]);
+  const applyWCL = useCallback(() => {
+    if (!wclPreview || !wclPreview.rows) return;
+    setBaseStats(prev => { const n = { ...prev }; wclPreview.rows.forEach(x => { n[x.player] = { ...(n[x.player] || DEF_STATS), attendance: Math.min(100, x.pct) }; }); return n; });
+    setWclPreview(null);
+  }, [wclPreview]);
   const doDrop = useCallback((player, item) => { setDrops(prev => [...prev, { player, item, ts: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }]); setDropTarget(null); }, []);
   const restoreDrop = useCallback(i => setDrops(prev => prev.filter((_, j) => j !== i)), []);
 
@@ -388,7 +420,13 @@ export default function App() {
         </div>)}
 
         {/* ══ PLAYERS ══ */}
-        {view === "players" && (
+        {view === "players" && (<div>
+          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
+            <label className="btn btn-sm" style={{ color: "#56c8ea", cursor: "pointer" }} title="Upload the attendance CSV from Warcraft Logs — preview before it applies">
+              Import WCL attendance
+              <input type="file" accept=".csv" onChange={e => { importWCL(e.target.files[0]); e.target.value = ""; }} style={{ display: "none" }} />
+            </label>
+          </div>
           <div style={{ overflowX: "auto", maxHeight: "calc(100vh - 300px)", overflowY: "auto" }}>
             <table><thead><tr><th>Player</th><th>Class</th><th>Att %</th><th>Tenure (wk)</th><th>Wins</th><th>BLP</th><th title="Unexcused absences">UA</th><th title={"Alts budget against " + ALT_BUDGET + " instead of " + BUDGET}>Alt</th><th>In line for</th></tr></thead>
               <tbody>{data.allPlayers.slice().sort((a, b) => a.localeCompare(b)).map(p => {
@@ -405,8 +443,9 @@ export default function App() {
                     <td className="green" style={{ fontWeight: 600 }}>{data.players[p].inLineFor}</td>
                   </tr>);
               })}</tbody></table>
-            <div className="sub" style={{ marginTop: 6 }}>Wins/BLP arrows show session-adjusted values (base edit + auto-increments from awards). Click a name for full profile.</div>
-          </div>)}
+            <div className="sub" style={{ marginTop: 6 }}>Wins/BLP arrows show session-adjusted values (base edit + auto-increments from awards). Click a name for full profile. Attendance can be filled from a Warcraft Logs attendance CSV with the import button above.</div>
+          </div>
+        </div>)}
 
         {/* ══ BUDGETS ══ */}
         {view === "budget" && (<div>
@@ -556,6 +595,26 @@ export default function App() {
             </div>
           </div>);
       })()}
+
+      {wclPreview && (
+        <div className="modal-overlay" onClick={() => setWclPreview(null)}>
+          <div className="modal wide" onClick={e => e.stopPropagation()}>
+            <h3>Warcraft Logs attendance</h3>
+            {wclPreview.error ? <p>{wclPreview.error}</p> : <>
+              <p className="sub">Raids in this export: {wclPreview.raids}. Attendance = nights present ÷ nights held. Applying overwrites Att % on the Players tab.</p>
+              <div style={{ maxHeight: 300, overflowY: "auto" }}>
+                <table><thead><tr><th>Log name</th><th>Player</th><th>Present</th><th>Att %</th></tr></thead>
+                  <tbody>{wclPreview.rows.map(x => (
+                    <tr key={x.wcl}><td className="dim">{x.wcl}</td><td><PN name={x.player} cls={data.players[x.player]?.cls} click={false} /></td><td>{x.att}/{x.held}</td>
+                      <td style={{ fontWeight: 600, color: x.pct === x.old ? "#888" : "#fbbf24" }}>{x.old} → {x.pct}</td></tr>))}
+                  </tbody></table>
+              </div>
+              {wclPreview.unmatched.length > 0 && <p className="sub" style={{ color: "#f87171", marginTop: 8 }}>No roster match (set these manually): {wclPreview.unmatched.join(", ")}</p>}
+              {wclPreview.missing.length > 0 && <p className="sub" style={{ marginTop: 4 }}>In roster but not in the log (unchanged): {wclPreview.missing.join(", ")}</p>}
+              <div className="modal-buttons"><button className="mx" onClick={() => setWclPreview(null)}>Cancel</button><button className="mc" onClick={applyWCL}>Apply to {wclPreview.rows.length} players</button></div>
+            </>}
+          </div>
+        </div>)}
 
       {discord !== null && (
         <div className="modal-overlay" onClick={() => setDiscord(null)}>
