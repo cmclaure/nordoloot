@@ -1,4 +1,4 @@
-import { BUDGET, LC_UPFRONT, lcChargeFor, DUP_OK, isTierName, REAGENTS, DEF_STATS, bossesFor, primaryBoss, tierTokenFor } from './constants.js'
+import { BUDGET, ALT_BUDGET, LC_UPFRONT, lcChargeFor, DUP_OK, isTierName, REAGENTS, DEF_STATS, bossesFor, primaryBoss, tierTokenFor } from './constants.js'
 
 // ── Score engine ──
 export function scoreParts(base, st, mod) {
@@ -98,6 +98,8 @@ export function compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, 
     else if (DUP_OK.has(it)) alloc[p][it] = v;
     else alloc[p][it] = (alloc[p][it] || 0) + v;
   };
+  // alts budget against ALT_BUDGET instead of the full amount
+  const capOf = p => ((baseStats || {})[p] && baseStats[p].alt) ? ALT_BUDGET : BUDGET;
   const budgetMode = {}; const autoFill = {};  // p -> Set(items) filled from leftover
   Object.keys(tmbWish).forEach(p => {
     const noted = tmbWish[p].filter(x => x.bid !== null && x.bid > 0);
@@ -109,7 +111,7 @@ export function compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, 
       const blanks = tmbWish[p].filter(x => (x.bid === null || x.bid <= 0) && !excluded(x.item));
       const notedSum = noted.reduce((a, x) => a + (excluded(x.item) ? 0 : x.bid), 0);
       const spentSum = (spentOf[p] || []).reduce((a, x) => a + x.pts, 0);
-      const remaining = Math.max(0, BUDGET - (lcCharge[p] || 0) - notedSum - spentSum);
+      const remaining = Math.max(0, capOf(p) - (lcCharge[p] || 0) - notedSum - spentSum);
       if (blanks.length && remaining > 0) {
         blanks.sort((a, b) => a.sort - b.sort);
         const N = blanks.length; const wsum = blanks.reduce((a, _, i) => a + (N - i), 0) || 1;
@@ -122,7 +124,7 @@ export function compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, 
       const list = tmbWish[p].filter(x => !excluded(x.item));
       if (!list.length) return;
       const N = list.length; const wsum = list.reduce((a, _, i) => a + (N - i), 0) || 1;
-      const budgetFor = Math.max(0, BUDGET - (lcCharge[p] || 0));
+      const budgetFor = Math.max(0, capOf(p) - (lcCharge[p] || 0));
       list.sort((a, b) => a.sort - b.sort);
       list.forEach((x, i) => addClaim(p, x.item, Math.max(1, Math.round(budgetFor * (N - i) / wsum))));
     }
@@ -159,7 +161,7 @@ export function compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, 
     rows.sort((a, b) => b.pts - a.pts);
     const charge = lcCharge[p] || 0;
     if (!rows.length && !charge) return;
-    budgets[p] = { total: rows.filter(r => !r.not).reduce((a, r) => a + r.pts, 0) + charge, lcCharge: charge, lcList: lcListOf[p] || [], mode: budgetMode[p] || "auto", edited: !!((ptsOverrides || {})[p] && Object.keys(ptsOverrides[p]).length), items: rows };
+    budgets[p] = { total: rows.filter(r => !r.not).reduce((a, r) => a + r.pts, 0) + charge, cap: capOf(p), lcCharge: charge, lcList: lcListOf[p] || [], mode: budgetMode[p] || "auto", edited: !!((ptsOverrides || {})[p] && Object.keys(ptsOverrides[p]).length), items: rows };
   });
 
   const allPlayers = new Set([...Object.keys(meta), ...Object.keys(baseStats || {})]);

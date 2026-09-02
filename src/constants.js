@@ -1,6 +1,7 @@
 // WoW class colors
 export const CC = { Warrior: "#C69B6D", Paladin: "#F48CBA", Hunter: "#AAD372", Rogue: "#FFF468", Priest: "#FFFFFF", Shaman: "#0070DD", Mage: "#3FC7EB", Warlock: "#8788EE", Druid: "#FF7C0A" };
 export const BUDGET = 500;
+export const ALT_BUDGET = 200;  // players marked as alts budget against this instead
 export const LC_CHARGE = 100;  // budget cost per LC shortlist spot
 export const LC_UPFRONT = 1;   // only the front waiting spot on each LC shortlist pays upfront; the rest pay on receipt
 // One Warglaive entry means chasing the pair — charged as both, no double-listing needed

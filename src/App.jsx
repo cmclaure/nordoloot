@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import Papa from 'papaparse'
-import { CC, BT, MH, RAID_BOSSES, CRAFTED, BUDGET, LC_CHARGE, LC_UPFRONT, lcChargeFor, MOD_DEF, DEF_STATS, DEFAULT_LC, TIER_TOKEN_IDS, tierTokenFor } from './constants.js'
+import { CC, BT, MH, RAID_BOSSES, CRAFTED, BUDGET, ALT_BUDGET, LC_CHARGE, LC_UPFRONT, lcChargeFor, MOD_DEF, DEF_STATS, DEFAULT_LC, TIER_TOKEN_IDS, tierTokenFor } from './constants.js'
 import { compute, LS, loadLS } from './engine.js'
 
 // merge a saved modifier object over MOD_DEF so keys added later pick up defaults
@@ -102,6 +102,7 @@ export default function App() {
   }, [pendingImport]);
 
   const setStat = useCallback((p, k, v) => setBaseStats(prev => {
+    if (k === "alt") return { ...prev, [p]: { ...(prev[p] || DEF_STATS), alt: !!v } };
     let n = v === "" ? 0 : (parseFloat(v) || 0);
     n = Math.max(0, n);
     if (k === "tenure") n = Math.min(4, n);       // weeks — score caps at 4, so the input does too
@@ -112,7 +113,7 @@ export default function App() {
   const clearOverrides = useCallback(p => setPtsOverrides(prev => { const n = { ...prev }; delete n[p]; return n; }), []);
 
   const doAward = useCallback((item, pick) => {
-    const winner = item.status === "ROLL" ? pick : item.winner;
+    const winner = pick || item.winner;
     if (!winner) return;
     const cls = item.contenders.find(c => c.player === winner)?.cls || "";
     setAwardLog(prev => [...prev, { item: item.item, player: winner, cls, ts: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }), wasRoll: item.status === "ROLL", tied: item.status === "ROLL" ? item.tied : undefined }]);
@@ -199,7 +200,7 @@ export default function App() {
       <td style={{ minWidth: 190 }}><ScoreBars item={item} /></td>
       <td className="gold" style={{ fontWeight: 600 }}>{item.status === "ROLL" ? "TIE" : "+" + item.gap.toFixed(0)}</td>
       {showActions && <td style={{ whiteSpace: "nowrap" }}>
-        <button className="btn-award" onClick={() => item.status === "ROLL" ? setAward({ item, pick: item.tied[0] }) : doAward(item)}>Award</button>{" "}
+        <button className="btn-award" onClick={() => setAward({ item, pick: item.status === "ROLL" ? item.tied[0] : item.winner })}>Award</button>{" "}
         <button className="btn-detail" onClick={() => setDetail(item)}>Details</button>{" "}
         <button className="btn-drop" onClick={() => setDropTarget(item)} title="Player got it outside raid">Drop</button>
       </td>}
@@ -380,7 +381,7 @@ export default function App() {
         {/* ══ PLAYERS ══ */}
         {view === "players" && (
           <div style={{ overflowX: "auto", maxHeight: "calc(100vh - 300px)", overflowY: "auto" }}>
-            <table><thead><tr><th>Player</th><th>Class</th><th>Att %</th><th>Tenure (wk)</th><th>Wins</th><th>BLP</th><th title="Unexcused absences">UA</th><th>In line for</th></tr></thead>
+            <table><thead><tr><th>Player</th><th>Class</th><th>Att %</th><th>Tenure (wk)</th><th>Wins</th><th>BLP</th><th title="Unexcused absences">UA</th><th title={"Alts budget against " + ALT_BUDGET + " instead of " + BUDGET}>Alt</th><th>In line for</th></tr></thead>
               <tbody>{data.allPlayers.slice().sort((a, b) => a.localeCompare(b)).map(p => {
                 const st = data.players[p].st; const b = baseStats[p] || DEF_STATS; return (
                   <tr key={p}>
@@ -391,6 +392,7 @@ export default function App() {
                     <td><input className="stat-input" value={b.wins} onChange={e => setStat(p, "wins", e.target.value)} /> {st.wins !== (+b.wins || 0) && <span className="gold" style={{ fontSize: 10 }}>→{st.wins}</span>}</td>
                     <td><input className="stat-input" value={b.blp} onChange={e => setStat(p, "blp", e.target.value)} /> {st.blp !== (+b.blp || 0) && <span className="gold" style={{ fontSize: 10 }}>→{st.blp}</span>}</td>
                     <td><input className="stat-input" value={b.ua ?? 0} onChange={e => setStat(p, "ua", e.target.value)} /></td>
+                    <td style={{ textAlign: "center" }}><input type="checkbox" checked={!!b.alt} onChange={e => setStat(p, "alt", e.target.checked)} style={{ accentColor: "#fbbf24", cursor: "pointer" }} /></td>
                     <td className="green" style={{ fontWeight: 600 }}>{data.players[p].inLineFor}</td>
                   </tr>);
               })}</tbody></table>
@@ -399,20 +401,21 @@ export default function App() {
 
         {/* ══ BUDGETS ══ */}
         {view === "budget" && (<div>
-          <div className="sub" style={{ marginBottom: 8 }}>Point bids come from each wishlist item's note in the TMB export (a bare number, e.g. <code>100</code>). Players with no note-bids get rank-derived auto points and aren't checked against the {BUDGET} budget; partial noters have their un-noted items auto-filled from the leftover (marked below). A tier set piece listed instead of its token counts as the token (marked below; duplicates collapse to the highest single bid). The front spot of an LC line — and every RECEIVED LC item — charges toward the total ({LC_CHARGE}; Warglaives {lcChargeFor("Warglaive of Azzinoth")} for the pair). Won items keep their bid in the total — points burn on win. Officer edits persist and survive re-imports.</div>
+          <div className="sub" style={{ marginBottom: 8 }}>Point bids come from each wishlist item's note in the TMB export (a bare number, e.g. <code>100</code>). Players with no note-bids get rank-derived auto points and aren't checked against the {BUDGET} budget; partial noters have their un-noted items auto-filled from the leftover (marked below). A tier set piece listed instead of its token counts as the token (marked below; duplicates collapse to the highest single bid). The front spot of an LC line — and every RECEIVED LC item — charges toward the total ({LC_CHARGE}; Warglaives {lcChargeFor("Warglaive of Azzinoth")} for the pair). Won items keep their bid in the total — points burn on win. Players marked <b>Alt</b> on the Players tab budget against {ALT_BUDGET} instead of {BUDGET}. Officer edits persist and survive re-imports.</div>
           <div style={{ overflowX: "auto", maxHeight: "calc(100vh - 300px)", overflowY: "auto" }}>
             <table><thead><tr><th>Player</th><th>Source</th><th>Items</th><th>Total</th><th>Status</th><th></th></tr></thead>
               <tbody>{Object.keys(data.budgets).sort((a, b) => a.localeCompare(b)).map(p => {
                 const b = data.budgets[p];
                 const checked = b.mode === "notes" || b.edited;
-                const diff = b.total - BUDGET;
+                const cap = b.cap || BUDGET;
+                const diff = b.total - cap;
                 return (<React.Fragment key={p}>
                   <tr>
                     <td><PN name={p} cls={data.players[p]?.cls} /></td>
-                    <td>{b.mode === "notes" ? <span className="tag tag-u">NOTES</span> : <span className="tag" style={{ background: "#1a1a1a", color: "#666", border: "1px solid #2a2a2a" }}>AUTO</span>}{b.edited && <span className="tag tag-c" style={{ marginLeft: 4 }}>EDITED</span>}</td>
+                    <td>{b.mode === "notes" ? <span className="tag tag-u">NOTES</span> : <span className="tag" style={{ background: "#1a1a1a", color: "#666", border: "1px solid #2a2a2a" }}>AUTO</span>}{cap !== BUDGET && <span className="tag" style={{ marginLeft: 4, color: "#fbbf24", background: "#252012", border: "1px solid #4a3d2d" }}>ALT {cap}</span>}{b.edited && <span className="tag tag-c" style={{ marginLeft: 4 }}>EDITED</span>}</td>
                     <td>{b.items.length}</td>
                     <td style={{ fontWeight: 700, color: !checked ? "#888" : diff === 0 ? "#4ade80" : diff > 0 ? "#f87171" : "#fbbf24" }}>{b.total}{b.lcCharge > 0 && <div className="sub" style={{ fontWeight: 400 }}>incl. {b.lcCharge} LC</div>}</td>
-                    <td>{!checked ? <span className="dim" style={{ fontSize: 10 }}>—</span> : diff === 0 ? <span className="green" style={{ fontSize: 11 }}>✓ exactly {BUDGET}</span> : diff > 0 ? <span className="red" style={{ fontSize: 11 }}>✕ {diff} over</span> : <span className="gold" style={{ fontSize: 11 }}>⚠ {-diff} under</span>}</td>
+                    <td>{!checked ? <span className="dim" style={{ fontSize: 10 }}>—</span> : diff === 0 ? <span className="green" style={{ fontSize: 11 }}>✓ exactly {cap}</span> : diff > 0 ? <span className="red" style={{ fontSize: 11 }}>✕ {diff} over</span> : <span className="gold" style={{ fontSize: 11 }}>⚠ {-diff} under</span>}</td>
                     <td style={{ whiteSpace: "nowrap" }}>
                       <button className="btn-detail" onClick={() => setBgExpand(bgExpand === p ? null : p)}>{bgExpand === p ? "Close" : "Adjust"}</button>{" "}
                       {b.edited && <button className="btn-undo" onClick={() => clearOverrides(p)}>Clear edits</button>}
@@ -493,14 +496,15 @@ export default function App() {
       {award && (
         <div className="modal-overlay" onClick={() => setAward(null)}>
           <div className="modal" onClick={e => e.stopPropagation()}>
-            <h3>Roll-off — {award.item.item}</h3>
-            <p>Scores are tied. Select the /roll winner:</p>
-            {award.item.contenders.filter(c => award.item.tied.includes(c.player)).map(c => (
+            <h3>{award.item.status === "ROLL" ? "Roll-off" : "Award"} — {award.item.item}</h3>
+            <p>{award.item.status === "ROLL" ? "Scores are tied. Select the /roll winner:" : "Defaults to the projected winner — pick someone else only if they're absent or passing."}</p>
+            {(award.item.status === "ROLL" ? award.item.contenders.filter(c => award.item.tied.includes(c.player)) : award.item.contenders).map(c => (
               <label key={c.player} style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 10px", background: award.pick === c.player ? "#1a2e1a" : "#111", border: "1px solid " + (award.pick === c.player ? "#2d4a2d" : "#2a2a2a"), borderRadius: 4, cursor: "pointer", marginBottom: 5 }}>
                 <input type="radio" name="roll" checked={award.pick === c.player} onChange={() => setAward(a => ({ ...a, pick: c.player }))} style={{ accentColor: "#4ade80" }} />
-                <span style={{ flex: 1 }}><PN name={c.player} cls={c.cls} click={false} /></span>
+                <span style={{ flex: 1 }}><PN name={c.player} cls={c.cls} click={false} />{award.item.status !== "ROLL" && c.player === award.item.winner && <span className="tag tag-c" style={{ marginLeft: 6 }}>PROJECTED</span>}</span>
                 <span className="sub">{c.final.toFixed(0)} pts · {c.st.wins}W</span>
               </label>))}
+            {award.item.status !== "ROLL" && award.pick !== award.item.winner && <p className="gold" style={{ fontSize: 11 }}>Skipping {award.item.winner} — their claim stays in line for the next copy.</p>}
             <div className="modal-buttons"><button className="mx" onClick={() => setAward(null)}>Cancel</button><button className="mc" onClick={() => doAward(award.item, award.pick)}>Award to {award.pick}</button></div>
           </div>
         </div>)}
