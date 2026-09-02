@@ -116,7 +116,7 @@ export default function App() {
     const winner = pick || item.winner;
     if (!winner) return;
     const cls = item.contenders.find(c => c.player === winner)?.cls || "";
-    setAwardLog(prev => [...prev, { item: item.item, player: winner, cls, ts: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }), wasRoll: item.status === "ROLL", tied: item.status === "ROLL" ? item.tied : undefined }]);
+    setAwardLog(prev => [...prev, { item: item.item, player: winner, cls, ts: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }), d: new Date().toISOString().slice(0, 10), wasRoll: item.status === "ROLL", tied: item.status === "ROLL" ? item.tied : undefined }]);
     setAward(null); setDetail(null);
   }, []);
   const undoAward = useCallback(i => setAwardLog(prev => prev.filter((_, j) => j !== i)), []);
@@ -150,11 +150,17 @@ export default function App() {
     // raider-facing exports carry no status tags — only a tie's /roll gets called out
     const line = i => i.status === "ROLL" ? `${i.item} - /roll between ${i.tied.join(", ")} (${i.contenders[0].final.toFixed(0)})\n` : `${i.item} - ${i.winner} (${i.contenders[0].final.toFixed(0)})\n`;
     if (type === "scores") { t = "**Nordoloot — Projected Winners**\n\n"; data.items.forEach(i => { t += line(i); }); }
-    else if (type === "addon") {
-      // paste string for the in-game addon: id|name|preformatted raid-warning line
+    else if (type === "addon" || type === "tmb") {
       const idOf = { ...TIER_TOKEN_IDS };
       (tmbRows || []).forEach(r => { const raw = (r.item_name || "").trim(); const id = parseInt(r.item_id); if (!raw || !id) return; if (!tierTokenFor(raw, r.item_id)) idOf[raw] = id; });
-      // "~" delimiter — WoW escapes "|" in editboxes, which broke the v1 pipe format
+      if (type === "tmb") {
+        // TMB "Assign Loot" CSV — itemID is the key; name omitted (some names contain commas)
+        t = "character,date,itemID,note\n";
+        awardLog.forEach(a => { t += `${a.player},${a.d || ""},${idOf[a.item] || ""},${a.wasRoll ? "roll win" : ""}\n`; });
+        setDiscord(t); return;
+      }
+      // paste string for the in-game addon: id~name~preformatted raid-warning line
+      // ("~" delimiter — WoW escapes "|" in editboxes, which broke the v1 pipe format)
       t = "NDL2\n";
       data.items.forEach(i => {
         const msg = i.status === "ROLL" ? `${i.item} - /roll: ${i.tied.join(", ")} (${i.contenders[0].final.toFixed(0)})` : `${i.item} - ${i.winner} (${i.contenders[0].final.toFixed(0)})`;
@@ -244,7 +250,10 @@ export default function App() {
                 {logOpen ? "▾" : "▸"} Awarded ({awardLog.length})
                 {!logOpen && data.logView.length > 0 && <span className="dim" style={{ marginLeft: 8, textTransform: "none", fontWeight: 400 }}>latest: {data.logView[data.logView.length - 1].player} — {data.logView[data.logView.length - 1].item}</span>}
               </span>
-              <button className="btn btn-sm" onClick={() => genDiscord("awarded")} style={{ color: "#4ade80" }}>Export</button>
+              <span style={{ display: "flex", gap: 6 }}>
+                <button className="btn btn-sm" onClick={() => genDiscord("tmb")} style={{ color: "#56c8ea" }} title="CSV for ThatsmyBIS's Assign Loot page">TMB</button>
+                <button className="btn btn-sm" onClick={() => genDiscord("awarded")} style={{ color: "#4ade80" }}>Export</button>
+              </span>
             </div>
             {logOpen && data.logView.map((a, i) => (<div className="log-row" key={i}>
               <span><PN name={a.player} cls={a.cls} /> <span className="dim">←</span> {a.item} {a.wasRoll && <span className="tag tag-r" style={{ marginLeft: 4 }}>ROLL</span>} <span className="dim" style={{ fontSize: 9, marginLeft: 4 }}>{a.ts}{a.spent > 0 ? ` · ${a.spent.toFixed(0)}pts spent` : ""}</span></span>
