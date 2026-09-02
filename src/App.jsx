@@ -121,6 +121,10 @@ export default function App() {
     setAward(null); setDetail(null);
   }, []);
   const undoAward = useCallback(i => setAwardLog(prev => prev.filter((_, j) => j !== i)), []);
+  // archive = already uploaded to TMB: hidden from the log view and future TMB/Discord exports,
+  // but still in the ledger (points burned, BLP, win counts all keep counting them)
+  const archiveAwards = useCallback(() => setAwardLog(prev => prev.map(a => ({ ...a, arch: true }))), []);
+  const unarchiveAwards = useCallback(() => setAwardLog(prev => prev.map(a => ({ ...a, arch: false }))), []);
 
   // Warcraft Logs attendance CSV: "Name","Att.%", then one column per raid with 1/blank
   const importWCL = useCallback((file) => {
@@ -186,9 +190,12 @@ export default function App() {
       const idOf = { ...TIER_TOKEN_IDS };
       (tmbRows || []).forEach(r => { const raw = (r.item_name || "").trim(); const id = parseInt(r.item_id); if (!raw || !id) return; if (!tierTokenFor(raw, r.item_id)) idOf[raw] = id; });
       if (type === "tmb") {
-        // TMB "Assign Loot" CSV — itemID is the key; name omitted (some names contain commas)
+        // TMB "Assign Loot" CSV — itemID is the key; name omitted (some names contain commas).
+        // Archived awards are skipped so re-uploads never duplicate receipts in TMB.
+        const fresh = awardLog.filter(a => !a.arch);
+        if (!fresh.length) { setDiscord("No unarchived awards — everything has already been exported to TMB.\nAward more loot, or use Unarchive if you need to re-export."); return; }
         t = "character,date,itemID,note\n";
-        awardLog.forEach(a => { t += `${a.player},${a.d || ""},${idOf[a.item] || ""},${a.wasRoll ? "roll win" : ""}\n`; });
+        fresh.forEach(a => { t += `${a.player},${a.d || ""},${idOf[a.item] || ""},${a.wasRoll ? "roll win" : ""}\n`; });
         setDiscord(t); return;
       }
       // paste string for the in-game addon: id~name~preformatted raid-warning line
@@ -200,7 +207,7 @@ export default function App() {
       });
     }
     else if (type === "tonight") { t = `**Tonight's Raid — ${raid}**\n\n`; raidBossList.forEach(b => { const its = data.items.filter(i => i.bosses.includes(b)); if (!its.length) return; t += `__${b}__\n`; its.forEach(i => { t += line(i); }); t += "\n"; }); }
-    else if (type === "awarded") { t = "**Loot Awarded This Session**\n\n"; awardLog.forEach(a => { t += `${a.player} - ${a.item}${a.wasRoll ? " (roll)" : ""} ${a.ts}\n`; }); }
+    else if (type === "awarded") { t = "**Loot Awarded This Session**\n\n"; awardLog.filter(a => !a.arch).forEach(a => { t += `${a.player} - ${a.item}${a.wasRoll ? " (roll)" : ""} ${a.ts}\n`; }); }
     setDiscord(t);
   }, [data, awardLog, raid, raidBossList, tmbRows]);
   const copyDiscord = useCallback(() => { navigator.clipboard.writeText(discord); }, [discord]);
@@ -275,23 +282,29 @@ export default function App() {
         </div>
       ) : (<>
         {/* session logs */}
-        {awardLog.length > 0 && (
+        {awardLog.length > 0 && (() => {
+          const active = data.logView.filter(a => !a.arch);
+          const archCount = awardLog.length - active.length;
+          return (
           <div className="log">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: logOpen ? 4 : 0 }}>
               <span className="gold" style={{ fontWeight: 600, fontSize: 10, textTransform: "uppercase", cursor: "pointer" }} onClick={() => setLogOpen(v => !v)}>
-                {logOpen ? "▾" : "▸"} Awarded ({awardLog.length})
-                {!logOpen && data.logView.length > 0 && <span className="dim" style={{ marginLeft: 8, textTransform: "none", fontWeight: 400 }}>latest: {data.logView[data.logView.length - 1].player} — {data.logView[data.logView.length - 1].item}</span>}
+                {logOpen ? "▾" : "▸"} Awarded ({active.length}{archCount > 0 ? ` · ${archCount} archived` : ""})
+                {!logOpen && active.length > 0 && <span className="dim" style={{ marginLeft: 8, textTransform: "none", fontWeight: 400 }}>latest: {active[active.length - 1].player} — {active[active.length - 1].item}</span>}
               </span>
               <span style={{ display: "flex", gap: 6 }}>
-                <button className="btn btn-sm" onClick={() => genDiscord("tmb")} style={{ color: "#56c8ea" }} title="CSV for ThatsmyBIS's Assign Loot page">TMB</button>
+                <button className="btn btn-sm" onClick={() => genDiscord("tmb")} style={{ color: "#56c8ea" }} title="CSV for ThatsmyBIS's Assign Loot page — unarchived awards only">TMB</button>
                 <button className="btn btn-sm" onClick={() => genDiscord("awarded")} style={{ color: "#4ade80" }}>Export</button>
+                {active.length > 0 && <button className="btn btn-sm" onClick={archiveAwards} style={{ color: "#fbbf24" }} title="Mark everything above as uploaded to TMB — hidden from the list and future exports, still counted in scores">Archive</button>}
               </span>
             </div>
-            {logOpen && data.logView.map((a, i) => (<div className="log-row" key={i}>
+            {logOpen && data.logView.map((a, i) => a.arch ? null : (<div className="log-row" key={i}>
               <span><PN name={a.player} cls={a.cls} /> <span className="dim">←</span> {a.item} {a.wasRoll && <span className="tag tag-r" style={{ marginLeft: 4 }}>ROLL</span>} <span className="dim" style={{ fontSize: 9, marginLeft: 4 }}>{a.ts}{a.spent > 0 ? ` · ${a.spent.toFixed(0)}pts spent` : ""}</span></span>
               <button className="btn-undo" onClick={() => undoAward(i)}>Undo</button>
             </div>))}
-          </div>)}
+            {logOpen && archCount > 0 && <div className="sub" style={{ marginTop: 4 }}>{archCount} archived award{archCount === 1 ? "" : "s"} hidden (still counted in scores and budgets) · <span style={{ cursor: "pointer", textDecoration: "underline" }} onClick={unarchiveAwards}>unarchive all</span></div>}
+          </div>);
+        })()}
         {drops.length > 0 && (
           <div className="log" style={{ borderColor: "#4a3d2d" }}>
             <span className="gold" style={{ fontWeight: 600, fontSize: 10, textTransform: "uppercase", cursor: "pointer" }} onClick={() => setDropsOpen(v => !v)}>{dropsOpen ? "▾" : "▸"} Dropped claims ({drops.length})</span>
