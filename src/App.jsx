@@ -28,6 +28,8 @@ export default function App() {
   const [profile, setProfile] = useState(null);
   const [discord, setDiscord] = useState(null);
   const [confirmReset, setConfirmReset] = useState(false);
+  const [logOpen, setLogOpen] = useState(false);
+  const [dropsOpen, setDropsOpen] = useState(false);
   const [dropTarget, setDropTarget] = useState(null); // item obj for drop-a-player modal
   const [drag, setDrag] = useState(null);
   const [savedFlash, setSavedFlash] = useState(false);
@@ -236,19 +238,22 @@ export default function App() {
         {/* session logs */}
         {awardLog.length > 0 && (
           <div className="log">
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-              <span className="gold" style={{ fontWeight: 600, fontSize: 10, textTransform: "uppercase" }}>Awarded ({awardLog.length})</span>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: logOpen ? 4 : 0 }}>
+              <span className="gold" style={{ fontWeight: 600, fontSize: 10, textTransform: "uppercase", cursor: "pointer" }} onClick={() => setLogOpen(v => !v)}>
+                {logOpen ? "▾" : "▸"} Awarded ({awardLog.length})
+                {!logOpen && data.logView.length > 0 && <span className="dim" style={{ marginLeft: 8, textTransform: "none", fontWeight: 400 }}>latest: {data.logView[data.logView.length - 1].player} — {data.logView[data.logView.length - 1].item}</span>}
+              </span>
               <button className="btn btn-sm" onClick={() => genDiscord("awarded")} style={{ color: "#4ade80" }}>Export</button>
             </div>
-            {data.logView.map((a, i) => (<div className="log-row" key={i}>
+            {logOpen && data.logView.map((a, i) => (<div className="log-row" key={i}>
               <span><PN name={a.player} cls={a.cls} /> <span className="dim">←</span> {a.item} {a.wasRoll && <span className="tag tag-r" style={{ marginLeft: 4 }}>ROLL</span>} <span className="dim" style={{ fontSize: 9, marginLeft: 4 }}>{a.ts}{a.spent > 0 ? ` · ${a.spent.toFixed(0)}pts spent` : ""}</span></span>
               <button className="btn-undo" onClick={() => undoAward(i)}>Undo</button>
             </div>))}
           </div>)}
         {drops.length > 0 && (
           <div className="log" style={{ borderColor: "#4a3d2d" }}>
-            <span className="gold" style={{ fontWeight: 600, fontSize: 10, textTransform: "uppercase" }}>Dropped claims ({drops.length})</span>
-            {drops.map((d, i) => (<div className="log-row" key={i}>
+            <span className="gold" style={{ fontWeight: 600, fontSize: 10, textTransform: "uppercase", cursor: "pointer" }} onClick={() => setDropsOpen(v => !v)}>{dropsOpen ? "▾" : "▸"} Dropped claims ({drops.length})</span>
+            {dropsOpen && drops.map((d, i) => (<div className="log-row" key={i}>
               <span><PN name={d.player} cls={data.players[d.player]?.cls} /> <span className="dim">—</span> {d.item} <span className="dim" style={{ fontSize: 9 }}>(got outside raid · {d.ts})</span></span>
               <button className="btn-award" onClick={() => restoreDrop(i)}>Restore</button>
             </div>))}
