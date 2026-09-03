@@ -134,9 +134,19 @@ export default function App() {
   // push current standings to the officer's Google Sheet via an Apps Script webhook
   const pushSheets = useCallback(() => {
     if (!sheetsUrl || !data) return;
+    // grouped by boss in raid order; raider-friendly status words (no internal CLEAR jargon)
+    const statusWord = i => i.status === "ROLL" ? "/roll tie" : i.status === "CLEAR" ? "Contested" : "Uncontested";
+    const byBoss = {};
+    data.items.forEach(i => { const b = i.boss || "Other"; (byBoss[b] = byBoss[b] || []).push(i); });
+    const bossOrder = [...new Set([...RAID_BOSSES[BT], ...RAID_BOSSES[MH], CRAFTED, ...Object.keys(byBoss)])].filter(b => byBoss[b]);
+    const standings = [["Item", "Projected winner", "Points", "Status", "Also in line"]];
+    bossOrder.forEach(b => {
+      standings.push(["", "", "", "", ""]);
+      standings.push([b.toUpperCase(), "", "", "", ""]);
+      byBoss[b].forEach(i => { const others = i.status === "ROLL" ? i.contenders.filter(c => !i.tied.includes(c.player)) : i.contenders.slice(1); standings.push([i.item, i.status === "ROLL" ? "/roll: " + i.tied.join(", ") : i.winner, Math.round(i.contenders[0].final), statusWord(i), others.map(c => c.player + " " + Math.round(c.final)).join(", ")]); });
+    });
     const tabs = {
-      Standings: [["Item", "Boss", "Projected winner", "Points", "Status", "Also in line"],
-        ...data.items.map(i => [i.item, i.boss || "", i.status === "ROLL" ? "/roll: " + i.tied.join(", ") : i.winner, Math.round(i.contenders[0].final), i.status, i.contenders.slice(1).map(c => c.player + " " + Math.round(c.final)).join(", ")])],
+      Standings: standings,
       Awarded: [["Player", "Item", "Date", "Roll"], ...awardLog.map(a => [a.player, a.item, a.d || "", a.wasRoll ? "yes" : ""])],
       "LC Lines": [["Item", "#", "Player", "Status"], ...lcItems.flatMap(l => (l.shortlist || []).map((x, i) => [l.name, i + 1, x.player, x.status || "waiting"]))],
       Info: [["Last updated"], [new Date().toLocaleString()]]

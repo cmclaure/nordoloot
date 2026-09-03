@@ -17,6 +17,10 @@ function doPost(e) {
     sh.clearContents();
     if (rows.length) sh.getRange(1, 1, rows.length, rows[0].length).setValues(rows);
     sh.getRange(1, 1, 1, rows.length ? rows[0].length : 1).setFontWeight("bold");
+    // bold section rows (first cell filled, the rest empty — e.g. boss headers)
+    for (var r = 1; r < rows.length; r++) {
+      if (rows[r][0] && rows[r].slice(1).join("") === "") sh.getRange(r + 1, 1, 1, rows[r].length).setFontWeight("bold");
+    }
   });
   return ContentService.createTextOutput("ok");
 }
