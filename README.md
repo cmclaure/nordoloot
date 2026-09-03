@@ -33,6 +33,7 @@ Or skip the terminal entirely: run `npm run build` once and open `dist/index.htm
 5. Keep attendance, tenure, and absence strikes up to date on the **Players** tab.
 6. **Export** (top right) saves everything to a single file — use it as a backup before raid, or send it to another officer, who can **Import** it and see exactly what you see.
 7. **Standings page** (raider-facing): regenerate with `node tools/standings.mjs <nordoloot-save.json> out.html`, feeding it the Export save file so stats, awards, LC lines, and officer edits are included (a raw TMB CSV works but uses defaults), then republish the artifact at the same URL.
+8. **Google Sheets push**: the **Sheets** button (Scores tab) sends Standings / Awarded / LC Lines tabs to a Google Sheet through an Apps Script webhook — setup steps are in `tools/nordoloot-sheets.gs`. Turn on auto-push in the same dialog and the sheet refreshes itself a few seconds after every import, award, or edit; share the sheet view-only and raiders always see the current state. Keep the webhook URL private (anyone holding it can write to the sheet).
 
 ## Raid night
 

@@ -31,6 +31,10 @@ export default function App() {
   const [logOpen, setLogOpen] = useState(false);
   const [dropsOpen, setDropsOpen] = useState(false);
   const [wclPreview, setWclPreview] = useState(null);
+  const [sheetsUrl, setSheetsUrl] = useState(s0.sheetsUrl || "");
+  const [sheetsAuto, setSheetsAuto] = useState(!!s0.sheetsAuto);
+  const [sheetsModal, setSheetsModal] = useState(false);
+  const [sheetsFlash, setSheetsFlash] = useState("");
   const [dropTarget, setDropTarget] = useState(null); // item obj for drop-a-player modal
   const [drag, setDrag] = useState(null);
   const [savedFlash, setSavedFlash] = useState(false);
@@ -55,9 +59,9 @@ export default function App() {
 
   // persist
   useEffect(() => {
-    const payload = { tmbRows, tmbName, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems, view, raid, bossIdx };
+    const payload = { tmbRows, tmbName, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems, view, raid, bossIdx, sheetsUrl, sheetsAuto };
     try { localStorage.setItem(LS, JSON.stringify(payload)); setSavedFlash(true); const t = setTimeout(() => setSavedFlash(false), 900); return () => clearTimeout(t); } catch (e) { }
-  }, [tmbRows, tmbName, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems, view, raid, bossIdx]);
+  }, [tmbRows, tmbName, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems, view, raid, bossIdx, sheetsUrl, sheetsAuto]);
 
   const importCSV = useCallback((file) => {
     if (!file) return;
@@ -71,13 +75,13 @@ export default function App() {
 
   // ── save file export/import ──
   const exportState = useCallback(() => {
-    const payload = { app: "nordoloot", version: 1, savedAt: new Date().toISOString(), tmbRows, tmbName, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems, view, raid, bossIdx };
+    const payload = { app: "nordoloot", version: 1, savedAt: new Date().toISOString(), tmbRows, tmbName, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems, view, raid, bossIdx, sheetsUrl, sheetsAuto };
     const blob = new Blob([JSON.stringify(payload, null, 1)], { type: "application/json" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = `nordoloot-save-${new Date().toISOString().slice(0, 10)}.json`;
     a.click(); URL.revokeObjectURL(a.href);
-  }, [tmbRows, tmbName, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems, view, raid, bossIdx]);
+  }, [tmbRows, tmbName, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems, view, raid, bossIdx, sheetsUrl, sheetsAuto]);
 
   const readSaveFile = useCallback((file) => {
     if (!file) return;
@@ -99,6 +103,7 @@ export default function App() {
     setAwardLog(o.awardLog || []); setDrops(o.drops || []);
     setMod(mergeMod(o.mod)); setExcludeTier(o.excludeTier !== undefined ? o.excludeTier : false);
     setLcItems(o.lcItems || DEFAULT_LC());
+    setSheetsUrl(o.sheetsUrl || ""); setSheetsAuto(!!o.sheetsAuto);
     setPendingImport(null); setView(o.view || "scores"); setRaid(o.raid || null); setBossIdx(o.bossIdx || 0); setBgExpand(null); setProfile(null); setDetail(null);
   }, [pendingImport]);
 
@@ -125,6 +130,28 @@ export default function App() {
   // but still in the ledger (points burned, BLP, win counts all keep counting them)
   const archiveAwards = useCallback(() => setAwardLog(prev => prev.map(a => ({ ...a, arch: true }))), []);
   const unarchiveAwards = useCallback(() => setAwardLog(prev => prev.map(a => ({ ...a, arch: false }))), []);
+
+  // push current standings to the officer's Google Sheet via an Apps Script webhook
+  const pushSheets = useCallback(() => {
+    if (!sheetsUrl || !data) return;
+    const tabs = {
+      Standings: [["Item", "Boss", "Projected winner", "Points", "Status", "Also in line"],
+        ...data.items.map(i => [i.item, i.boss || "", i.status === "ROLL" ? "/roll: " + i.tied.join(", ") : i.winner, Math.round(i.contenders[0].final), i.status, i.contenders.slice(1).map(c => c.player + " " + Math.round(c.final)).join(", ")])],
+      Awarded: [["Player", "Item", "Date", "Roll"], ...awardLog.map(a => [a.player, a.item, a.d || "", a.wasRoll ? "yes" : ""])],
+      "LC Lines": [["Item", "#", "Player", "Status"], ...lcItems.flatMap(l => (l.shortlist || []).map((x, i) => [l.name, i + 1, x.player, x.status || "waiting"]))],
+      Info: [["Last updated"], [new Date().toLocaleString()]]
+    };
+    setSheetsFlash("pushing…");
+    fetch(sheetsUrl, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ tabs }) })
+      .then(() => setSheetsFlash("pushed " + new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })))
+      .catch(() => setSheetsFlash("push failed — check the webhook URL"));
+  }, [sheetsUrl, data, awardLog, lcItems]);
+  // auto-push: debounced after any data change (imports, awards, stat edits)
+  useEffect(() => {
+    if (!sheetsAuto || !sheetsUrl || !data) return;
+    const t = setTimeout(pushSheets, 4000);
+    return () => clearTimeout(t);
+  }, [data, sheetsAuto, sheetsUrl, pushSheets]);
 
   // Warcraft Logs attendance CSV: "Name","Att.%", then one column per raid with 1/blank
   const importWCL = useCallback((file) => {
@@ -348,6 +375,7 @@ export default function App() {
             <input type="text" placeholder="Search item or player…" value={search} onChange={e => setSearch(e.target.value)} style={{ marginLeft: "auto", padding: "3px 8px", fontSize: 11, width: 190 }} />
             <button className="btn btn-sm" onClick={() => genDiscord("scores")} style={{ color: "#4ade80" }}>Discord</button>
             <button className="btn btn-sm" onClick={() => genDiscord("addon")} style={{ color: "#56c8ea" }} title="Copy into the in-game Nordoloot addon (/ndl)">Addon</button>
+            <button className="btn btn-sm" onClick={() => setSheetsModal(true)} style={{ color: sheetsAuto && sheetsUrl ? "#4ade80" : "#fbbf24" }} title="Push standings to a Google Sheet">Sheets{sheetsAuto && sheetsUrl ? " ●" : ""}</button>
           </div>
           <div style={{ overflowX: "auto", maxHeight: "calc(100vh - 300px)", overflowY: "auto" }}>
             <table><thead><tr><th>Item</th><th>Status</th><th>Top contenders</th><th>Gap</th><th>Actions</th></tr></thead>
@@ -608,6 +636,24 @@ export default function App() {
             </div>
           </div>);
       })()}
+
+      {sheetsModal && (
+        <div className="modal-overlay" onClick={() => setSheetsModal(false)}>
+          <div className="modal wide" onClick={e => e.stopPropagation()}>
+            <h3>Google Sheets push</h3>
+            <p className="sub">One-time setup: create a Google Sheet → Extensions → Apps Script → paste the script from <code>tools/nordoloot-sheets.gs</code> → Deploy → New deployment → Web app, execute as <b>Me</b>, access <b>Anyone</b> → copy the web app URL below. Share the Sheet itself as view-only with the raid. Anyone holding the webhook URL can write to the sheet — share the Sheet link, not this URL.</p>
+            <input type="text" placeholder="https://script.google.com/macros/s/…/exec" value={sheetsUrl} onChange={e => setSheetsUrl(e.target.value.trim())} style={{ width: "100%", padding: "6px 8px", fontSize: 12, marginBottom: 8 }} />
+            <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, marginBottom: 6, cursor: "pointer" }}>
+              <input type="checkbox" checked={sheetsAuto} onChange={e => setSheetsAuto(e.target.checked)} style={{ accentColor: "#4ade80" }} />
+              Push automatically a few seconds after anything changes (imports, awards, edits)
+            </label>
+            {sheetsFlash && <div className="sub" style={{ color: sheetsFlash.startsWith("push failed") ? "#f87171" : "#4ade80" }}>{sheetsFlash}</div>}
+            <div className="modal-buttons">
+              <button className="mx" onClick={() => setSheetsModal(false)}>Close</button>
+              <button className="mc" onClick={pushSheets} disabled={!sheetsUrl}>Push now</button>
+            </div>
+          </div>
+        </div>)}
 
       {wclPreview && (
         <div className="modal-overlay" onClick={() => setWclPreview(null)}>
