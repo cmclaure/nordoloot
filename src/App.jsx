@@ -487,14 +487,14 @@ export default function App() {
                     <td className="dim" style={{ fontSize: 11 }}>{data.players[p].cls || "—"}</td>
                     <td><input className="stat-input" value={b.attendance} onChange={e => setStat(p, "attendance", e.target.value)} /></td>
                     <td><input className="stat-input" value={b.tenure} onChange={e => setStat(p, "tenure", e.target.value)} /></td>
-                    <td><input className="stat-input" value={b.wins} onChange={e => setStat(p, "wins", e.target.value)} /> {st.wins !== (+b.wins || 0) && <span className="gold" style={{ fontSize: 10 }}>→{st.wins}</span>}</td>
-                    <td><input className="stat-input" value={b.blp} onChange={e => setStat(p, "blp", e.target.value)} /> {st.blp !== (+b.blp || 0) && <span className="gold" style={{ fontSize: 10 }}>→{st.blp}</span>}</td>
+                    <td style={{ color: "#96938d", fontWeight: 600 }}>{st.wins}</td>
+                    <td style={{ color: st.blp > 0 ? "#fbbf24" : "#96938d", fontWeight: 600 }}>{st.blp > 0 ? "+" + st.blp * (mod.blp.on ? mod.blp.w : 0) : "—"}</td>
                     <td><input className="stat-input" value={b.ua ?? 0} onChange={e => setStat(p, "ua", e.target.value)} /></td>
                     <td style={{ textAlign: "center" }}><input type="checkbox" checked={!!b.alt} onChange={e => setStat(p, "alt", e.target.checked)} style={{ accentColor: "#fbbf24", cursor: "pointer" }} /></td>
                     <td className="green" style={{ fontWeight: 600 }}>{data.players[p].inLineFor}</td>
                   </tr>);
               })}</tbody></table>
-            <div className="sub" style={{ marginTop: 6 }}>Wins/BLP arrows show session-adjusted values (base edit + auto-increments from awards). Click a name for full profile. Attendance can be filled from a Warcraft Logs attendance CSV with the import button above.</div>
+            <div className="sub" style={{ marginTop: 6 }}>Wins and BLP are tracked automatically from the award log (BLP shows the bonus points from lost /rolls). Click a name for full profile. Attendance can be filled from a Warcraft Logs attendance CSV with the import button above.</div>
           </div>
         </div>)}
 
