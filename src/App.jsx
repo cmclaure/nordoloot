@@ -35,6 +35,8 @@ export default function App() {
   const [sheetsAuto, setSheetsAuto] = useState(!!s0.sheetsAuto);
   const [sheetsModal, setSheetsModal] = useState(false);
   const [sheetsFlash, setSheetsFlash] = useState("");
+  const [removedPlayers, setRemovedPlayers] = useState(s0.removedPlayers || []);
+  const [confirmRemove, setConfirmRemove] = useState(null);
   const [dropTarget, setDropTarget] = useState(null); // item obj for drop-a-player modal
   const [drag, setDrag] = useState(null);
   const [savedFlash, setSavedFlash] = useState(false);
@@ -51,17 +53,23 @@ export default function App() {
   // save-file import: {data} awaiting confirm, or {error}
   const [pendingImport, setPendingImport] = useState(null);
 
-  const data = useMemo(() => tmbRows ? compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems) : null,
-    [tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems]);
+  // rows for removed players (left the guild) are ignored everywhere until restored
+  const activeRows = useMemo(() => {
+    if (!tmbRows || !removedPlayers.length) return tmbRows;
+    const gone = new Set(removedPlayers);
+    return tmbRows.filter(r => !gone.has((r.character_name || "").trim()));
+  }, [tmbRows, removedPlayers]);
+  const data = useMemo(() => activeRows ? compute(activeRows, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems) : null,
+    [activeRows, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems]);
 
   // init/merge player stats when data players change
   useEffect(() => { if (!data) return; setBaseStats(prev => { let ch = false; const n = { ...prev }; data.allPlayers.forEach(p => { if (!n[p]) { n[p] = { ...DEF_STATS }; ch = true } }); return ch ? n : prev; }); }, [data]);
 
   // persist
   useEffect(() => {
-    const payload = { tmbRows, tmbName, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems, view, raid, bossIdx, sheetsUrl, sheetsAuto };
+    const payload = { tmbRows, tmbName, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems, view, raid, bossIdx, sheetsUrl, sheetsAuto, removedPlayers };
     try { localStorage.setItem(LS, JSON.stringify(payload)); setSavedFlash(true); const t = setTimeout(() => setSavedFlash(false), 900); return () => clearTimeout(t); } catch (e) { }
-  }, [tmbRows, tmbName, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems, view, raid, bossIdx, sheetsUrl, sheetsAuto]);
+  }, [tmbRows, tmbName, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems, view, raid, bossIdx, sheetsUrl, sheetsAuto, removedPlayers]);
 
   const importCSV = useCallback((file) => {
     if (!file) return;
@@ -75,13 +83,13 @@ export default function App() {
 
   // ── save file export/import ──
   const exportState = useCallback(() => {
-    const payload = { app: "nordoloot", version: 1, savedAt: new Date().toISOString(), tmbRows, tmbName, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems, view, raid, bossIdx, sheetsUrl, sheetsAuto };
+    const payload = { app: "nordoloot", version: 1, savedAt: new Date().toISOString(), tmbRows, tmbName, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems, view, raid, bossIdx, sheetsUrl, sheetsAuto, removedPlayers };
     const blob = new Blob([JSON.stringify(payload, null, 1)], { type: "application/json" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = `nordoloot-save-${new Date().toISOString().slice(0, 10)}.json`;
     a.click(); URL.revokeObjectURL(a.href);
-  }, [tmbRows, tmbName, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems, view, raid, bossIdx, sheetsUrl, sheetsAuto]);
+  }, [tmbRows, tmbName, ptsOverrides, baseStats, awardLog, drops, mod, excludeTier, lcItems, view, raid, bossIdx, sheetsUrl, sheetsAuto, removedPlayers]);
 
   const readSaveFile = useCallback((file) => {
     if (!file) return;
@@ -104,6 +112,7 @@ export default function App() {
     setMod(mergeMod(o.mod)); setExcludeTier(o.excludeTier !== undefined ? o.excludeTier : false);
     setLcItems(o.lcItems || DEFAULT_LC());
     setSheetsUrl(o.sheetsUrl || ""); setSheetsAuto(!!o.sheetsAuto);
+    setRemovedPlayers(o.removedPlayers || []);
     setPendingImport(null); setView(o.view || "scores"); setRaid(o.raid || null); setBossIdx(o.bossIdx || 0); setBgExpand(null); setProfile(null); setDetail(null);
   }, [pendingImport]);
 
@@ -128,6 +137,17 @@ export default function App() {
   const undoAward = useCallback(i => setAwardLog(prev => prev.filter((_, j) => j !== i)), []);
   // archive = already uploaded to TMB: hidden from the log view and future TMB/Discord exports,
   // but still in the ledger (points burned, BLP, win counts all keep counting them)
+  // removing a player: stats, adjustments, and LC spots go; award history stays; their TMB
+  // rows are ignored on every import until restored
+  const removePlayer = useCallback(p => {
+    setRemovedPlayers(prev => prev.includes(p) ? prev : [...prev, p]);
+    setBaseStats(prev => { const n = { ...prev }; delete n[p]; return n; });
+    setPtsOverrides(prev => { const n = { ...prev }; delete n[p]; return n; });
+    setLcItems(prev => prev.map(l => ({ ...l, shortlist: (l.shortlist || []).filter(x => x.player !== p) })));
+    setConfirmRemove(null);
+  }, []);
+  const restorePlayer = useCallback(p => setRemovedPlayers(prev => prev.filter(x => x !== p)), []);
+
   const archiveAwards = useCallback(() => setAwardLog(prev => prev.map(a => ({ ...a, arch: true }))), []);
   const unarchiveAwards = useCallback(() => setAwardLog(prev => prev.map(a => ({ ...a, arch: false }))), []);
 
@@ -196,7 +216,7 @@ export default function App() {
   const doDrop = useCallback((player, item) => { setDrops(prev => [...prev, { player, item, ts: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }]); setDropTarget(null); }, []);
   const restoreDrop = useCallback(i => setDrops(prev => prev.filter((_, j) => j !== i)), []);
 
-  const reset = useCallback(() => { localStorage.removeItem(LS); setTmb(null); setTmbName(""); setPtsOverrides({}); setBaseStats({}); setAwardLog([]); setDrops([]); setMod(MOD_DEF); setExcludeTier(false); setLcItems(DEFAULT_LC()); setConfirmReset(false); setView("scores"); setRaid(null); setBossIdx(0); setBgExpand(null); }, []);
+  const reset = useCallback(() => { localStorage.removeItem(LS); setTmb(null); setTmbName(""); setPtsOverrides({}); setBaseStats({}); setAwardLog([]); setDrops([]); setMod(MOD_DEF); setExcludeTier(false); setLcItems(DEFAULT_LC()); setConfirmReset(false); setView("scores"); setRaid(null); setBossIdx(0); setBgExpand(null); setRemovedPlayers([]); }, []);
 
   // filtered items
   const filtered = useMemo(() => {
@@ -479,7 +499,7 @@ export default function App() {
             </label>
           </div>
           <div style={{ overflowX: "auto", maxHeight: "calc(100vh - 300px)", overflowY: "auto" }}>
-            <table><thead><tr><th>Player</th><th>Class</th><th>Att %</th><th>Tenure (wk)</th><th>Wins</th><th>BLP</th><th title="Unexcused absences">UA</th><th title={"Alts budget against " + ALT_BUDGET + " instead of " + BUDGET}>Alt</th><th>In line for</th></tr></thead>
+            <table><thead><tr><th>Player</th><th>Class</th><th>Att %</th><th>Tenure (wk)</th><th>Wins</th><th>BLP</th><th title="Unexcused absences">UA</th><th title={"Alts budget against " + ALT_BUDGET + " instead of " + BUDGET}>Alt</th><th>In line for</th><th></th></tr></thead>
               <tbody>{data.allPlayers.slice().sort((a, b) => a.localeCompare(b)).map(p => {
                 const st = data.players[p].st; const b = baseStats[p] || DEF_STATS; return (
                   <tr key={p}>
@@ -492,9 +512,11 @@ export default function App() {
                     <td><input className="stat-input" value={b.ua ?? 0} onChange={e => setStat(p, "ua", e.target.value)} /></td>
                     <td style={{ textAlign: "center" }}><input type="checkbox" checked={!!b.alt} onChange={e => setStat(p, "alt", e.target.checked)} style={{ accentColor: "#fbbf24", cursor: "pointer" }} /></td>
                     <td className="green" style={{ fontWeight: 600 }}>{data.players[p].inLineFor}</td>
+                    <td><button className="btn-undo" onClick={() => setConfirmRemove(p)}>Remove</button></td>
                   </tr>);
               })}</tbody></table>
             <div className="sub" style={{ marginTop: 6 }}>Wins and BLP are tracked automatically from the award log (BLP shows the bonus points from lost /rolls). Click a name for full profile. Attendance can be filled from a Warcraft Logs attendance CSV with the import button above.</div>
+            {removedPlayers.length > 0 && <div className="sub" style={{ marginTop: 4 }}>Removed (TMB rows ignored): {removedPlayers.map((p, i) => <span key={p}>{i > 0 && " · "}{p} <span style={{ cursor: "pointer", textDecoration: "underline" }} onClick={() => restorePlayer(p)}>restore</span></span>)}</div>}
           </div>
         </div>)}
 
@@ -646,6 +668,16 @@ export default function App() {
             </div>
           </div>);
       })()}
+
+      {confirmRemove && (
+        <div className="modal-overlay" onClick={() => setConfirmRemove(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <h3>Remove {confirmRemove}?</h3>
+            <p>This takes them out of every item line and deletes their stats, bid adjustments, and LC shortlist spots. Their TMB rows are ignored on every future import until restored, and past awards stay in the history.</p>
+            <p className="sub">Use this for players who left the guild — a restore link stays on the Players tab if they come back.</p>
+            <div className="modal-buttons"><button className="mx" onClick={() => setConfirmRemove(null)}>Cancel</button><button className="mc" style={{ background: "#4a2d2d", borderColor: "#6a3d3d" }} onClick={() => removePlayer(confirmRemove)}>Remove {confirmRemove}</button></div>
+          </div>
+        </div>)}
 
       {sheetsModal && (
         <div className="modal-overlay" onClick={() => setSheetsModal(false)}>
