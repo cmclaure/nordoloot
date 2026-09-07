@@ -37,7 +37,6 @@ export const BL = {
 export const CRAFTED = "Crafted (BoP)";
 // non-unique rings players may want two of — each TMB listing is a separate claim
 export const DUP_OK = new Set(["Band of Devastation", "Blessed Band of Karabor", "Ring of Ancient Knowledge"]);
-export const BOSS_RAID = {}; Object.entries(RAID_BOSSES).forEach(([r, bs]) => bs.forEach(b => BOSS_RAID[b] = r));
 export const ITEM_BOSSES = {}; Object.entries(BL).forEach(([b, items]) => items.forEach(it => { (ITEM_BOSSES[it] = ITEM_BOSSES[it] || []).push(b) }));
 export const bossesFor = it => ITEM_BOSSES[it] || [];
 export const primaryBoss = it => (ITEM_BOSSES[it] || [])[0] || null;

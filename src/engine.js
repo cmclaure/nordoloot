@@ -239,10 +239,9 @@ export function compute(tmbRows, ptsOverrides, baseStats, awardLog, drops, mod, 
   });
 
   const counts = { total: items.length, uncontested: items.filter(i => i.status === "UNCONTESTED").length, clear: items.filter(i => i.status === "CLEAR").length, roll: items.filter(i => i.status === "ROLL").length, contested: items.filter(i => i.count > 1).length };
-  return { items, players, counts, meta, logView, budgets, allPlayers: [...allPlayers] };
+  return { items, players, counts, logView, budgets, allPlayers: [...allPlayers] };
 }
 
 // ── localStorage ──
 export const LS = "nordoloot.v1";
-// falls back to the pre-rename key so previously saved data migrates on first load
-export const loadLS = () => { try { return JSON.parse(localStorage.getItem(LS) || localStorage.getItem("onslaught.v1") || "null") } catch (e) { return null } };
+export const loadLS = () => { try { return JSON.parse(localStorage.getItem(LS) || "null") } catch (e) { return null } };
