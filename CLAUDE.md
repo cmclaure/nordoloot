@@ -23,7 +23,7 @@ Verification gotchas: drive imports via DataTransfer + dispatched `change` on th
 - LC: no bids; front-of-line pays upfront (Skull 100, Warglaive pair 200 — one entry per raider), everyone behind pays on receipt; leaving the front refunds; receipt never double-charges.
 - Double rings (Band of Devastation, Blessed Band of Karabor, Ring of Ancient Knowledge): list twice, separate bids/claims.
 - Lists locked at first raid night (policy, not enforced in-app — an import-diff warning is a known wanted feature).
-- Alts (guild-requested only): Alt checkbox on Players tab → 200 budget; person-level stats copied; main keeps claims and accrues attendance. Respec only if guild needs it: relist remaining (500 − spent) points, modifiers carry, officer reviews for sniping. Late lister = forced AUTO (rank order only). Removed players (left guild): Remove button, TMB rows ignored until restored, award history kept.
+- Alts (guild-requested only): Alt checkbox on Players tab → 200 budget; person-level stats copied; main keeps claims and accrues attendance. Respec only if guild needs it: relist remaining (500 − spent) points, modifiers carry, officer reviews for sniping. Late lister = forced AUTO (rank order only). Removed players (left guild): Remove button, TMB rows ignored until restored, award history kept. **Mid-phase recruits (adopted 2026-09-08): prorated budget = 500 × weeks-remaining/12, rounded to 10, floor 250; officer DMs the number, public rules say only "prorated". First case: shaman recruited week 3 → 420.**
 - Award modal lists all contenders (absent winner → award to next, claim preserved). Rolls must be awarded in-app (only source of BLP).
 
 ## Officer data loop
@@ -36,6 +36,6 @@ TMB export CSV → drop on app. After raid: TMB button (unarchived awards only, 
 
 ## Pending decisions / roadmap
 - **Drought BLP + fewest-contested-wins tiebreak** — proposed, simulated (six 2-week seeds: drought halves the zero-loot list; tiebreak kills rolls; 1–5/54 drops shift, always toward the loot-less; ~45% of drops disenchant so drop RNG dominates "feeling behind"). Tracking design: raid nights = distinct award-log dates; per-night presence kept from the WCL import; reset on any award (LC receipts need a date stamp). Waiting on officer sign-off.
-- Prorated budgets for mid-phase recruits (500 × weeks-remaining/12, floor ~250) — recommended, not yet adopted.
+- Per-player budget override in-app (mid-phase recruits) — engine only knows 500/ALT 200; prorated recruits are policed manually via the off-budget banner until built. If a recruit notes nothing, AUTO fills to 500.
 - Import bid-diff + unparseable-note warnings at import time — wanted, unbuilt.
 - Raid schedule: BT Tuesdays (prog), Hyjal Thursdays. Test baselines: `fake-tmb-export-p3-notes.csv` → 59 items, 5 off-budget (Grimjaw 545, Frostbyte 460, Voidlord 450, Dotsmagee 610, Chainmend 425).
